@@ -46,7 +46,7 @@
 </section>
 {% else %}
 <section class="landing-hero">
-  <div class="landing-copy">
+  <div class="landing-copy landing-copy-centered">
     <p class="eyebrow">BIOMEDICAL ENGINEERING · EQUIPMENT MANAGEMENT</p>
     <h1>Reliable medical equipment.<br><em>Safer patient care.</em></h1>
     <p class="landing-lead">Medical equipment must be safe, accurate and ready when patients need it. MedMaintain is designed to help biomedical teams keep equipment records and maintenance activity organized.</p>
@@ -66,93 +66,29 @@
 </section>
 
 <section class="section maintenance-cycle">
-  <div class="section-heading-center"><p class="eyebrow">THE MAINTENANCE CYCLE</p><h2>Four important parts of equipment care</h2><p class="lead">Maintenance begins before a device enters clinical use and continues throughout its service life.</p></div>
-  <div class="maintenance-slideshow" data-maintenance-slideshow>
-    <div class="slides-viewport" data-slides-viewport>
-      <div class="slides-track">
-        <article class="maintenance-slide cycle-slide">
-          <div class="slide-image"><img src="{{ url_for('static', filename='maintenance-cycle.svg') }}" alt="Illustration of the medical equipment maintenance cycle"></div>
-          <div class="slide-copy"><p class="slide-kicker">01 / THE BIG PICTURE</p><h3>The maintenance cycle</h3><p>Medical equipment care is a continuous process that starts before a device enters clinical use and continues throughout its service life.</p><ul><li>Prepare and install equipment correctly.</li><li>Maintain, inspect and test it regularly.</li><li>Repair faults and verify safe operation before return to use.</li></ul></div>
-        </article>
-        <article class="maintenance-slide">
-          <div class="slide-image"><img src="{{ url_for('static', filename='installation-setup.svg') }}" alt="Medical equipment installation and setup"></div>
-          <div class="slide-copy"><p class="slide-kicker">02 / GETTING STARTED</p><h3>Installation and setup</h3><p>Prepare equipment for safe, dependable use in its clinical environment.</p><ul><li>Check site, power and environmental requirements.</li><li>Install and configure the device.</li><li>Test operation before clinical use.</li></ul></div>
-        </article>
-        <article class="maintenance-slide">
-          <div class="slide-image"><img src="{{ url_for('static', filename='preventive-maintenance.svg') }}" alt="Preventive maintenance inspection"></div>
-          <div class="slide-copy"><p class="slide-kicker">03 / PREVENT FAILURE</p><h3>Preventive maintenance</h3><p>Planned maintenance helps reduce the likelihood of unexpected equipment failure.</p><ul><li>Perform scheduled inspections and cleaning.</li><li>Replace worn parts when required.</li><li>Follow manufacturer recommendations.</li></ul></div>
-        </article>
-        <article class="maintenance-slide">
-          <div class="slide-image"><img src="{{ url_for('static', filename='calibration-testing.svg') }}" alt="Medical equipment calibration and testing"></div>
-          <div class="slide-copy"><p class="slide-kicker">04 / VERIFY PERFORMANCE</p><h3>Calibration and testing</h3><p>Confirm that devices provide accurate measurements and operate safely.</p><ul><li>Verify measurements against references.</li><li>Test alarms and safety functions.</li><li>Record results and adjustments.</li></ul></div>
-        </article>
-        <article class="maintenance-slide">
-          <div class="slide-image"><img src="{{ url_for('static', filename='troubleshooting-repair.svg') }}" alt="Biomedical equipment troubleshooting and repair"></div>
-          <div class="slide-copy"><p class="slide-kicker">05 / RESTORE AND VERIFY</p><h3>Troubleshooting and repair</h3><p>Identify faults, restore equipment function and verify performance before the device returns to service.</p><ul><li>Identify and diagnose the fault.</li><li>Repair or replace faulty components.</li><li>Verify performance before return to use.</li></ul></div>
-        </article>
-      </div>
-    </div>
-    <div class="slideshow-controls">
-      <button class="slide-arrow" type="button" data-slide-prev aria-label="Previous slide">←</button>
-      <div class="slide-pagination" aria-label="Choose a maintenance slide">
-        <button type="button" data-slide-to="0" aria-label="Slide 1" aria-current="true"></button>
-        <button type="button" data-slide-to="1" aria-label="Slide 2"></button>
-        <button type="button" data-slide-to="2" aria-label="Slide 3"></button>
-        <button type="button" data-slide-to="3" aria-label="Slide 4"></button>
-        <button type="button" data-slide-to="4" aria-label="Slide 5"></button>
-      </div>
-      <span class="slide-counter" data-slide-counter>01 / 05</span>
-      <button class="slide-arrow" type="button" data-slide-next aria-label="Next slide">→</button>
-    </div>
+  <div class="section-heading-center"><p class="eyebrow">THE MAINTENANCE CYCLE</p><h2>Five stages of equipment care</h2><p class="lead">Maintenance begins before a device enters clinical use and continues throughout its service life.</p></div>
+  <div class="maintenance-stage-grid">
+    <article class="maintenance-stage-card">
+      <div class="stage-image"><img src="{{ url_for('static', filename='maintenance-cycle.svg') }}" alt="Medical equipment maintenance cycle"></div>
+      <div class="stage-copy"><span class="stage-number">01</span><h3>The maintenance cycle</h3><p>Continuous care throughout the equipment's service life.</p><ul><li>Plan and prepare equipment.</li><li>Inspect, maintain and test.</li><li>Document work and follow up.</li></ul></div>
+    </article>
+    <article class="maintenance-stage-card">
+      <div class="stage-image"><img src="{{ url_for('static', filename='installation-setup.svg') }}" alt="Medical equipment installation and setup"></div>
+      <div class="stage-copy"><span class="stage-number">02</span><h3>Installation and setup</h3><p>Prepare equipment for safe use in its clinical environment.</p><ul><li>Check site and power requirements.</li><li>Install and configure the device.</li><li>Test before clinical use.</li></ul></div>
+    </article>
+    <article class="maintenance-stage-card">
+      <div class="stage-image"><img src="{{ url_for('static', filename='preventive-maintenance.svg') }}" alt="Preventive maintenance inspection"></div>
+      <div class="stage-copy"><span class="stage-number">03</span><h3>Preventive maintenance</h3><p>Reduce the likelihood of unexpected equipment failure.</p><ul><li>Perform planned inspections.</li><li>Clean and replace worn parts.</li><li>Follow manufacturer guidance.</li></ul></div>
+    </article>
+    <article class="maintenance-stage-card">
+      <div class="stage-image"><img src="{{ url_for('static', filename='calibration-testing.svg') }}" alt="Medical equipment calibration and testing"></div>
+      <div class="stage-copy"><span class="stage-number">04</span><h3>Calibration and testing</h3><p>Confirm accuracy and safe equipment performance.</p><ul><li>Verify measurements.</li><li>Test alarms and safety functions.</li><li>Record results and adjustments.</li></ul></div>
+    </article>
+    <article class="maintenance-stage-card">
+      <div class="stage-image"><img src="{{ url_for('static', filename='troubleshooting-repair.svg') }}" alt="Biomedical equipment troubleshooting and repair"></div>
+      <div class="stage-copy"><span class="stage-number">05</span><h3>Troubleshooting and repair</h3><p>Restore equipment function when faults occur.</p><ul><li>Identify and diagnose faults.</li><li>Repair or replace components.</li><li>Verify before return to service.</li></ul></div>
+    </article>
   </div>
-  <script>
-  (() => {
-    const root = document.querySelector('[data-maintenance-slideshow]');
-    if (!root || root.dataset.ready) return;
-    root.dataset.ready = 'true';
-    const viewport = root.querySelector('[data-slides-viewport]');
-    const dots = [...root.querySelectorAll('[data-slide-to]')];
-    const counter = root.querySelector('[data-slide-counter]');
-    let active = 0;
-    let timer;
-    const show = (index) => {
-      active = (index + dots.length) % dots.length;
-      viewport.scrollTo({ left: active * viewport.clientWidth, behavior: 'smooth' });
-      dots.forEach((dot, i) => {
-        if (i === active) dot.setAttribute('aria-current', 'true');
-        else dot.removeAttribute('aria-current');
-      });
-      counter.textContent = String(active + 1).padStart(2, '0') + ' / 05';
-    };
-    const stop = () => window.clearInterval(timer);
-    const start = () => {
-      stop();
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        timer = window.setInterval(() => show(active + 1), 6500);
-      }
-    };
-    root.querySelector('[data-slide-prev]').addEventListener('click', () => { show(active - 1); start(); });
-    root.querySelector('[data-slide-next]').addEventListener('click', () => { show(active + 1); start(); });
-    dots.forEach((dot, i) => dot.addEventListener('click', () => { show(i); start(); }));
-    root.addEventListener('mouseenter', stop);
-    root.addEventListener('mouseleave', start);
-    root.addEventListener('focusin', stop);
-    root.addEventListener('focusout', start);
-    let scrollTimer;
-    viewport.addEventListener('scroll', () => {
-      window.clearTimeout(scrollTimer);
-      scrollTimer = window.setTimeout(() => {
-        active = Math.max(0, Math.min(dots.length - 1, Math.round(viewport.scrollLeft / viewport.clientWidth)));
-        dots.forEach((dot, i) => {
-          if (i === active) dot.setAttribute('aria-current', 'true');
-          else dot.removeAttribute('aria-current');
-        });
-        counter.textContent = String(active + 1).padStart(2, '0') + ' / 05';
-      }, 80);
-    }, { passive: true });
-    start();
-  })();
-  </script>
 </section>
 
 <section class="impact-section">
@@ -171,6 +107,6 @@
 
 <section class="future-band"><div><p class="eyebrow">EVOLVING HEALTHCARE TECHNOLOGY</p><h2>Maintenance keeps moving forward.</h2><p>New technologies are changing how medical devices are used and supported. Biomedical teams increasingly work with:</p><div class="future-tags"><span>AI-enabled diagnostics</span><span>Robotic systems</span><span>Remote monitoring</span><span>Connected devices</span><span>Medical software</span></div></div><div class="future-side-note">Good maintenance combines sound engineering practice, careful documentation and ongoing learning.</div></section>
 
-<section class="cta-section"><div><p class="eyebrow">MEDMAINTAIN</p><h2>Bring equipment information and maintenance records together.</h2><p>Sign in to access the equipment register, or create a technician account to begin recording maintenance activity.</p></div><p class="cta-ribbon-note">Use the Sign in or Create account options in the top navigation to access the equipment workspace.</p></section>
+
 {% endif %}
 {% endblock %}
