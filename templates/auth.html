@@ -1,1 +1,46 @@
-{% extends "base.html" %}{% block content %}<section class="auth"><p class="eyebrow">TECHNICIAN ACCESS</p><h1>{{'Create an account' if mode=='register' else 'Welcome back'}}</h1><p class="lead">{{'Register to submit equipment and maintenance entries.' if mode=='register' else 'Sign in to manage maintenance entries.'}}</p><form method="post"><label>Username<input name="username" required minlength="3" autocomplete="username"></label><label>Password<input type="password" name="password" required minlength="10" autocomplete="{{'new-password' if mode=='register' else 'current-password'}}"></label><button class="button">{{'Create account' if mode=='register' else 'Sign in'}}</button></form><p class="hint">{% if mode=='register' %}Already registered? <a href="/login">Sign in</a>{% else %}New technician? <a href="/register">Create an account</a>{% endif %}</p></section>{% endblock %}
+{% extends "base.html" %}
+{% block title %}{{'Create account' if mode=='register' else 'Sign in'}} | MedMaintain{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <aside class="auth-aside">
+    <div class="auth-aside-copy">
+      <span class="auth-mark">✚</span>
+      <p class="eyebrow">BIOMEDICAL ENGINEERING · MEDICAL EQUIPMENT</p>
+      <h1>{{'Build better maintenance habits.' if mode=='register' else 'Welcome back to MedMaintain.'}}</h1>
+      <p>{{'Create your technician account to access equipment records and document maintenance work.' if mode=='register' else 'Sign in to continue managing equipment information, service history and maintenance records.'}}</p>
+      <ul class="auth-benefits">
+        <li><span>✓</span> Equipment register and service history</li>
+        <li><span>✓</span> Preventive and corrective maintenance records</li>
+        <li><span>✓</span> Better equipment traceability</li>
+      </ul>
+    </div>
+    <div class="auth-illustration">
+      <img src="{{url_for('static',filename='maintenance-illustration.svg')}}" alt="Biomedical engineer checking medical equipment">
+      <div class="auth-caption"><span class="art-pulse"></span><span><b>Supporting reliable healthcare technology</b><small>Maintain · Calibrate · Repair</small></span></div>
+    </div>
+    <span class="auth-aside-foot">MEDMAINTAIN · EQUIPMENT RELIABILITY</span>
+  </aside>
+  <div class="auth-panel">
+    <div class="auth-panel-inner">
+      <p class="eyebrow">{{'GET STARTED' if mode=='register' else 'SECURE WORKSPACE ACCESS'}}</p>
+      <h2>{{'Create your account' if mode=='register' else 'Sign in'}}</h2>
+      <p class="auth-subtitle">{{'Register as a technician to access the MedMaintain equipment workspace.' if mode=='register' else 'Enter your account details to open your maintenance workspace.'}}</p>
+      <form method="post" class="auth-form">
+        <label for="username">Username
+          <input id="username" name="username" required minlength="3" maxlength="80" autocomplete="username" placeholder="Enter your username" autocapitalize="none">
+        </label>
+        <label for="password">Password
+          <input id="password" type="password" name="password" required minlength="10" autocomplete="{{'new-password' if mode=='register' else 'current-password'}}" placeholder="{{'Create a password (at least 10 characters)' if mode=='register' else 'Enter your password'}}">
+        </label>
+        {% if mode=='register' %}<p class="password-hint"><span>i</span> Use at least 10 characters for your password.</p>{% endif %}
+        <button class="button auth-submit" type="submit">{{'Create account' if mode=='register' else 'Sign in to MedMaintain'}} <span>→</span></button>
+      </form>
+      <div class="auth-switch">
+        {% if mode=='register' %}<span>Already have an account?</span> <a href="{{url_for('login')}}">Sign in</a>
+        {% else %}<span>New to MedMaintain?</span> <a href="{{url_for('register')}}">Create an account</a>{% endif %}
+      </div>
+      <a class="auth-back" href="{{url_for('index')}}">← Back to homepage</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
