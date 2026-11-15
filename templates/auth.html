@@ -1,193 +1,24 @@
-
 {% extends "base.html" %}
 {% block title %}{{ 'Create account' if mode == 'register' else 'Sign in' }} | MedMaintain{% endblock %}
-
 {% block content %}
 <section class="auth-screen">
-
-    <!-- LEFT PANEL -->
-    <aside class="auth-visual">
-
-        <a class="auth-brand" href="{{ url_for('index') }}">
-            <span>✚</span>
-            <b>
-                MedMaintain
-                <small>MEDICAL EQUIPMENT MAINTENANCE</small>
-            </b>
-        </a>
-
-        <div class="auth-visual-copy">
-
-            <p class="auth-overline">
-                BIOMEDICAL ENGINEERING · EQUIPMENT CARE
-            </p>
-
-            <h1>
-                {% if mode == 'register' %}
-                    Join the team keeping medical equipment reliable.
-                {% else %}
-                    Reliable medical equipment. Safer patient care.
-                {% endif %}
-            </h1>
-
-            <p>
-                {% if mode == 'register' %}
-                    Create your technician account to document maintenance,
-                    manage equipment information and support dependable
-                    healthcare services.
-                {% else %}
-                    Access medical equipment records, maintenance histories
-                    and the tools you need to support safe and reliable
-                    healthcare equipment.
-                {% endif %}
-            </p>
-
-        </div>
-
-        <div class="auth-visual-foot">
-            <span>01</span>
-            <span>MAINTAIN · CALIBRATE · REPAIR</span>
-        </div>
-
-    </aside>
-
-
-    <!-- RIGHT PANEL -->
-    <main class="auth-form-side">
-
-        <div class="auth-form-panel">
-
-            <h2>
-                {{ 'Create Account' if mode == 'register' else 'Sign In' }}
-            </h2>
-
-            <p class="auth-form-intro">
-                {% if mode == 'register' %}
-                    Register to access the MedMaintain workspace.
-                {% else %}
-                    Enter your username and password to continue.
-                {% endif %}
-            </p>
-
-
-            <form method="POST" class="auth-form">
-
-                <label for="username">
-                    Username
-
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        required
-                        minlength="3"
-                        maxlength="80"
-                        autocomplete="username"
-                        placeholder=" "
-                        autocapitalize="none"
-                    >
-                </label>
-
-
-                <label for="password">
-                    Password
-
-                    <div class="password-field">
-
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            required
-                            {% if mode == 'register' %}minlength="10"{% endif %}
-                            autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}"
-                            placeholder=" "
-                        >
-
-                        <button
-                            type="button"
-                            class="password-toggle"
-                            id="togglePassword"
-                            aria-label="Show password"
-                        >
-                            ◉
-                        </button>
-
-                    </div>
-                </label>
-
-
-                {% if mode == 'register' %}
-                    <p class="auth-password-hint">
-                        Use at least 10 characters for your password.
-                    </p>
-                {% else %}
-                    <div class="forgot-password-note">
-                        Forgot your password? Contact your administrator.
-                    </div>
-                {% endif %}
-
-
-                <button class="auth-submit" type="submit">
-                    {{ 'CREATE ACCOUNT' if mode == 'register' else 'SIGN IN' }}
-                </button>
-
-            </form>
-
-
-            <div class="auth-switch">
-
-                {% if mode == 'register' %}
-                    <span>Already have an account?</span>
-                    <a href="{{ url_for('login') }}">SIGN IN</a>
-                {% else %}
-                    <span>Don't have an account?</span>
-                    <a href="{{ url_for('register') }}">CREATE ACCOUNT</a>
-                {% endif %}
-
-            </div>
-
-
-            <div class="auth-divider">
-                <span>OR</span>
-            </div>
-
-
-            <a class="auth-home-link" href="{{ url_for('index') }}">
-                ← Back to homepage
-            </a>
-
-        </div>
-
-    </main>
-
-</section>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const password = document.getElementById("password");
-    const toggle = document.getElementById("togglePassword");
-
-    if (password && toggle) {
-        toggle.addEventListener("click", function () {
-
-            const hidden = password.type === "password";
-
-            password.type = hidden ? "text" : "password";
-
-            toggle.setAttribute(
-                "aria-label",
-                hidden ? "Hide password" : "Show password"
-            );
-
-            toggle.textContent = hidden ? "◎" : "◉";
-
-        });
-    }
-
-});
-</script>
-
+<aside class="auth-visual">
+<a class="auth-brand" href="{{ url_for('index') }}"><span class="auth-brand-mark">✚</span><span class="auth-brand-name">MedMaintain<small>MEDICAL EQUIPMENT MAINTENANCE</small></span></a>
+<div class="auth-visual-copy"><p class="auth-overline">BIOMEDICAL ENGINEERING · EQUIPMENT CARE</p>
+<h1>{% if mode == 'register' %}Join the team keeping medical equipment reliable.{% else %}Reliable medical equipment. Safer patient care.{% endif %}</h1>
+<p>{% if mode == 'register' %}Create your technician account to document maintenance, manage equipment information and support dependable healthcare services.{% else %}Access equipment records, maintenance histories and the tools you need to support safe, reliable healthcare equipment.{% endif %}</p></div>
+<div class="auth-visual-foot"><span>01</span><span>MAINTAIN · CALIBRATE · REPAIR</span></div>
+</aside>
+<section class="auth-form-side" aria-label="{{ 'Create account' if mode == 'register' else 'Sign in' }}"><div class="auth-form-panel">
+<p class="auth-form-eyebrow">WELCOME TO MEDMAINTAIN</p><h2>{{ 'Create account' if mode == 'register' else 'Sign in' }}</h2>
+<p class="auth-form-intro">{% if mode == 'register' %}Register to access the MedMaintain workspace.{% else %}Enter your account details to continue.{% endif %}</p>
+<form method="POST" class="auth-form">
+<label for="username">Username<input type="text" id="username" name="username" required minlength="3" maxlength="80" autocomplete="username" autocapitalize="none" placeholder="Enter your username"></label>
+<label for="password">Password<span class="password-field"><input type="password" id="password" name="password" required {% if mode == 'register' %}minlength="10"{% endif %} autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" placeholder="Enter your password"><button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">Show</button></span></label>
+{% if mode == 'register' %}<p class="auth-password-hint">Use at least 10 characters for your password.</p>{% else %}<p class="auth-help-note">If you have forgotten your password, contact your administrator.</p>{% endif %}
+<button class="auth-submit" type="submit">{{ 'CREATE ACCOUNT' if mode == 'register' else 'SIGN IN' }}<span aria-hidden="true">→</span></button></form>
+<p class="auth-switch">{% if mode == 'register' %}Already have an account? <a href="{{ url_for('login') }}">Sign in</a>{% else %}Don't have an account? <a href="{{ url_for('register') }}">Create account</a>{% endif %}</p>
+<div class="auth-divider"><span>OR</span></div><a class="auth-home-link" href="{{ url_for('index') }}">← Back to homepage</a>
+</div></section></section>
+<script>(function(){const p=document.getElementById("password"),b=document.getElementById("togglePassword");if(!p||!b)return;b.addEventListener("click",function(){const show=p.type==="password";p.type=show?"text":"password";b.textContent=show?"Hide":"Show";b.setAttribute("aria-label",show?"Hide password":"Show password");});})();</script>
 {% endblock %}
