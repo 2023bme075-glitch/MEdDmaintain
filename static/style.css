@@ -212,3 +212,72 @@ footer{background:rgba(255,255,255,.94)}
  .slideshow-controls{gap:13px}
 }
 @media(prefers-reduced-motion:reduce){.slides-viewport{scroll-behavior:auto}.slide-arrow,.slide-pagination button{transition:none}}
+
+
+/* Homepage: centered title and still horizontal maintenance stage cards */
+.container:has(.landing-hero) .landing-copy-centered{text-align:center;margin-left:auto;margin-right:auto;max-width:920px}
+.container:has(.landing-hero) .landing-copy-centered .landing-lead{margin-left:auto;margin-right:auto}
+.container:has(.landing-hero) .landing-copy-centered .hero-benefits{width:max-content;max-width:100%;margin:22px auto 0;text-align:left}
+.maintenance-stage-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:13px;align-items:stretch}
+.maintenance-stage-card{min-width:0;overflow:hidden;background:#fff;border:1px solid #dcebe6;border-radius:17px;box-shadow:0 9px 26px rgba(22,75,69,.07)}
+.stage-image{height:145px;display:grid;place-items:center;padding:10px;background:linear-gradient(145deg,#e7f4f0,#f2f7fa)}
+.stage-image img{display:block;width:100%;height:100%;object-fit:contain}
+.stage-copy{padding:17px 15px 20px}
+.stage-number{display:inline-grid;place-items:center;width:29px;height:29px;border-radius:9px;background:#e0f3eb;color:#087e70;font-size:11px;font-weight:800}
+.stage-copy h3{min-height:45px;margin:12px 0 8px;color:#20464a;font-size:14px;line-height:1.4}
+.stage-copy p{min-height:62px;margin:0;color:#6a8081;font-size:10px;line-height:1.65}
+.stage-copy ul{margin:13px 0 0;padding-left:15px;color:#557171;font-size:9px;line-height:1.7}
+.stage-copy li{margin:4px 0}
+@media(max-width:1050px){.maintenance-stage-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.container:has(.landing-hero) .landing-copy-centered .hero-benefits{width:100%}.maintenance-stage-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stage-image{height:125px}.stage-copy{padding:14px 12px 16px}.stage-copy h3,.stage-copy p{min-height:unset}}
+@media(max-width:430px){.maintenance-stage-grid{grid-template-columns:1fr}.stage-image{height:175px}}
+
+/* Full-screen, professional split authentication inspired by the supplied reference */
+body:has(.auth-screen){background:#fff}
+body:has(.auth-screen)>.nav,body:has(.auth-screen)>footer{display:none}
+body:has(.auth-screen)>.container{width:100%;max-width:none;margin:0;padding:0}
+body:has(.auth-screen)>.container>.flash{position:relative;z-index:5;width:min(500px,90vw);margin:12px auto}
+.auth-screen{display:grid;grid-template-columns:1.08fr .92fr;min-height:100vh;background:#fff}
+.auth-visual{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:100vh;overflow:hidden;padding:42px clamp(34px,5vw,76px);color:#fff;background:linear-gradient(90deg,rgba(5,27,47,.91),rgba(7,42,57,.66)),url("/static/biomedical-maintenance-hero.webp") center/cover no-repeat}
+.auth-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(4,24,42,.4),transparent 48%);pointer-events:none}
+.auth-brand,.auth-visual-copy,.auth-visual-foot{position:relative;z-index:1}
+.auth-brand{display:flex;align-items:center;gap:12px;width:max-content;color:#fff;text-decoration:none}
+.auth-brand>span{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.15);font-size:24px}
+.auth-brand b{font-size:18px;letter-spacing:.2px}
+.auth-brand small{display:block;margin-top:4px;font-size:8px;letter-spacing:1.7px;font-weight:700;color:#c5dfdf}
+.auth-visual-copy{max-width:650px;margin:auto 0;padding:55px 0}
+.auth-overline{margin:0 0 18px;color:#9de5d2;font-size:10px;font-weight:800;letter-spacing:2px}
+.auth-visual-copy h1{max-width:650px;margin:0 0 22px;color:#fff;font-family:"Roboto Serif",Georgia,serif;font-size:clamp(38px,4.5vw,64px);line-height:1.08;letter-spacing:-1.7px}
+.auth-visual-copy>p:last-child{max-width:550px;margin:0;color:#e2eeee;font-size:15px;line-height:1.85}
+.auth-visual-foot{display:flex;align-items:center;gap:13px;color:#d0e5e1;font-size:9px;font-weight:800;letter-spacing:2px}
+.auth-visual-foot span:first-child{display:grid;place-items:center;width:29px;height:29px;border:1px solid rgba(255,255,255,.5);border-radius:50%;font-size:9px}
+.auth-form-side{display:grid;place-items:center;min-height:100vh;padding:55px clamp(28px,5vw,82px);background:#fff}
+.auth-form-panel{width:100%;max-width:460px}
+.auth-form-eyebrow{margin:0 0 14px;color:#168775;font-size:10px;font-weight:850;letter-spacing:2px}
+.auth-form-panel h2{margin:0 0 12px;color:#102f3d;font-family:Arial,sans-serif;font-size:clamp(34px,3.5vw,45px);font-weight:500;letter-spacing:-1.3px}
+.auth-form-intro{margin:0 0 42px;color:#73858c;font-size:13px;line-height:1.7}
+.auth-screen .auth-form{display:grid;gap:27px}
+.auth-screen .auth-form label{display:grid;gap:10px;color:#173c4b;font-family:Arial,sans-serif;font-size:13px;font-weight:600}
+.auth-screen .auth-form input{width:100%;height:49px;padding:0 2px;border:0;border-bottom:1px solid #b9c8ce;border-radius:0;background:transparent;color:#173c4b;font-family:Arial,sans-serif;font-size:14px;outline:none;box-shadow:none}
+.auth-screen .auth-form input:focus{border-bottom:2px solid #087e70;background:transparent;box-shadow:none}
+.auth-screen .auth-form input::placeholder{color:#a0adb2}
+.auth-screen .password-hint{margin:-14px 0 0;font-size:10px}
+.auth-submit{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:49px;margin-top:8px;padding:0 22px;border:0;border-radius:30px;background:#087e70;color:#fff;font-family:Arial,sans-serif;font-size:12px;font-weight:800;letter-spacing:.5px;cursor:pointer;transition:background .2s,transform .2s}
+.auth-submit:hover{background:#05685e;transform:translateY(-1px)}
+.auth-submit span{font-size:18px}
+.auth-screen .auth-switch{display:flex;justify-content:center;gap:5px;margin-top:28px;color:#647b83;font-family:Arial,sans-serif;font-size:12px}
+.auth-screen .auth-switch a,.auth-home-link{color:#087e70;font-weight:750;text-decoration:none}
+.auth-screen .auth-switch a:hover,.auth-home-link:hover{text-decoration:underline}
+.auth-divider{display:flex;align-items:center;gap:14px;margin:36px 0 23px;color:#a0afb3;font-size:9px;letter-spacing:2px}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:#e0e7e9}
+.auth-home-link{display:block;width:max-content;margin:0 auto;font-size:11px}
+@media(max-width:760px){
+ .auth-screen{grid-template-columns:1fr}
+ .auth-visual{min-height:360px;padding:27px 27px 22px}
+ .auth-visual-copy{padding:52px 0 42px}
+ .auth-visual-copy h1{font-size:37px}
+ .auth-visual-copy>p:last-child{font-size:13px}
+ .auth-visual-foot{display:none}
+ .auth-form-side{min-height:auto;padding:48px 28px 55px}
+ .auth-form-intro{margin-bottom:30px}
+}
