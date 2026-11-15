@@ -286,3 +286,403 @@ body:has(.auth-screen)>.container>.flash{position:relative;z-index:5;width:min(5
 /* Realistic photographic maintenance-stage images */
 .maintenance-stage-card .stage-image{padding:0;overflow:hidden;background:#eaf3f1}
 .maintenance-stage-card .stage-image img{width:100%;height:100%;object-fit:cover;object-position:center}
+
+/* ==========================================
+   MEDMAINTAIN PROFESSIONAL LOGIN INTERFACE
+   ========================================== */
+
+body:has(.auth-screen) {
+    background: #ffffff;
+}
+
+body:has(.auth-screen) > .nav,
+body:has(.auth-screen) > footer {
+    display: none;
+}
+
+body:has(.auth-screen) > .container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.auth-screen {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    width: 100%;
+    min-height: 100vh;
+    background: #ffffff;
+}
+
+/* LEFT IMAGE PANEL */
+
+.auth-visual {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+    padding: 48px 7.3%;
+    overflow: hidden;
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(4, 22, 49, 0.88),
+            rgba(5, 34, 58, 0.58)
+        ),
+        url("/static/biomedical-maintenance-hero.webp")
+        center center / cover no-repeat;
+}
+
+.auth-visual::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        0deg,
+        rgba(3, 20, 42, 0.42),
+        transparent 55%
+    );
+
+    pointer-events: none;
+}
+
+.auth-brand,
+.auth-visual-copy,
+.auth-visual-foot {
+    position: relative;
+    z-index: 2;
+}
+
+/* BRAND */
+
+.auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    width: fit-content;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.auth-brand > span {
+    display: grid;
+    place-items: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.16);
+    font-size: 25px;
+}
+
+.auth-brand b {
+    font-size: 20px;
+    letter-spacing: 0.3px;
+}
+
+.auth-brand small {
+    display: block;
+    margin-top: 4px;
+    color: #d2e5ee;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+}
+
+/* LEFT HEADING AND DESCRIPTION */
+
+.auth-visual-copy {
+    max-width: 700px;
+    margin: auto 0;
+    padding: 65px 0;
+}
+
+.auth-overline {
+    margin-bottom: 20px;
+    color: #a5e5d5;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.auth-visual-copy h1 {
+    max-width: 650px;
+    margin: 0 0 24px;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: clamp(38px, 4.5vw, 62px);
+    font-weight: 750;
+    line-height: 1.08;
+    letter-spacing: -1.8px;
+}
+
+.auth-visual-copy > p:last-child {
+    max-width: 570px;
+    color: #e5edf1;
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+/* LEFT FOOTER */
+
+.auth-visual-foot {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    color: #d3e4e8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.auth-visual-foot span:first-child {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255,255,255,.65);
+    border-radius: 50%;
+}
+
+/* RIGHT WHITE PANEL */
+
+.auth-form-side {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 55px 9%;
+    background: #ffffff;
+}
+
+.auth-form-panel {
+    width: 100%;
+    max-width: 430px;
+}
+
+/* FORM HEADING */
+
+.auth-form-panel h2 {
+    margin: 0 0 64px;
+    color: #101b2d;
+    font-family: Arial, sans-serif;
+    font-size: clamp(36px, 3.5vw, 45px);
+    font-weight: 500;
+    letter-spacing: -1px;
+}
+
+.auth-form-intro {
+    margin-top: -45px;
+    margin-bottom: 42px;
+    color: #71818a;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* INPUTS */
+
+.auth-screen .auth-form {
+    display: grid;
+    gap: 34px;
+}
+
+.auth-screen .auth-form label {
+    display: grid;
+    gap: 12px;
+    color: #111e30;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.auth-screen .auth-form input {
+    width: 100%;
+    height: 43px;
+    padding: 0 2px;
+    border: none;
+    border-bottom: 1px solid #aab7c2;
+    border-radius: 0;
+    background: transparent;
+    color: #142c3c;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    outline: none;
+    box-shadow: none;
+}
+
+.auth-screen .auth-form input:focus {
+    border-bottom: 2px solid #0878bd;
+    box-shadow: none;
+    background: transparent;
+}
+
+/* PASSWORD VISIBILITY */
+
+.password-field {
+    position: relative;
+    width: 100%;
+}
+
+.password-field input {
+    padding-right: 42px !important;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 4px;
+    bottom: 8px;
+    border: none;
+    background: transparent;
+    color: #24394b;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* PASSWORD HELP */
+
+.forgot-password-note {
+    margin-top: -24px;
+    text-align: right;
+    color: #0878bd;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+}
+
+.auth-password-hint {
+    margin-top: -22px;
+    color: #71818a;
+    font-size: 11px;
+}
+
+/* BLUE SIGN IN BUTTON */
+
+.auth-screen .auth-submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 49px;
+    margin-top: 12px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 30px;
+    background: #0878bd;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .4px;
+    cursor: pointer;
+    transition: background .2s ease;
+}
+
+.auth-screen .auth-submit:hover {
+    background: #05639f;
+}
+
+/* CREATE ACCOUNT / SIGN IN LINK */
+
+.auth-screen .auth-switch {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 27px;
+    color: #172b3d;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+}
+
+.auth-screen .auth-switch a {
+    color: #101b2d;
+    font-weight: 800;
+    text-decoration: underline;
+}
+
+/* OR DIVIDER */
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 37px 0 25px;
+    color: #72808b;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: #d4dadd;
+}
+
+.auth-home-link {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    color: #0878bd;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+/* RESPONSIVE DESIGN */
+
+@media (max-width: 850px) {
+
+    .auth-screen {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-visual {
+        min-height: 390px;
+        padding: 30px;
+    }
+
+    .auth-visual-copy {
+        padding: 50px 0;
+    }
+
+    .auth-visual-copy h1 {
+        font-size: 38px;
+    }
+
+    .auth-form-side {
+        min-height: auto;
+        padding: 55px 30px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .auth-visual {
+        min-height: 350px;
+        padding: 24px;
+    }
+
+    .auth-visual-copy h1 {
+        font-size: 32px;
+    }
+
+    .auth-visual-copy > p:last-child {
+        font-size: 13px;
+    }
+
+    .auth-form-side {
+        padding: 42px 24px;
+    }
+
+    .auth-form-panel h2 {
+        font-size: 34px;
+        margin-bottom: 55px;
+    }
+
+}
