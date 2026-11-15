@@ -1,6 +1,49 @@
-{% extends "base.html" %}{% block content %}
-<section class="hero"><div><p class="eyebrow">CLINICAL ENGINEERING REGISTER</p><h1>Keep every device<br><em>ready for care.</em></h1><p class="lead">A shared register for medical equipment, maintenance activity and operational status.</p><div class="actions">{% if current_user.is_authenticated %}<a class="button" href="/submit">＋ Add maintenance entry</a>{% else %}<a class="button" href="/register">Create technician account</a><a class="textlink" href="/login">Already registered? Sign in</a>{% endif %}</div></div><div class="hero-aside"><span class="live">● LIVE REGISTER</span><strong>{{stats.total}}</strong><small>equipment and service records</small><hr><small>Public viewing · Sign-in required to submit</small></div></section>
-<section class="stats"><div><small>Total records</small><b>{{stats.total}}</b></div><div><small>Operational</small><b>{{stats.operational}}</b></div><div><small>In maintenance</small><b>{{stats.maintenance}}</b></div><div><small>Out of service</small><b>{{stats.out}}</b></div></section>
-<section class="section"><div class="sectionhead"><div><p class="eyebrow">EQUIPMENT REGISTER</p><h2>Recent maintenance records</h2></div><form class="search"><input name="q" value="{{q}}" placeholder="Search serial, model, location…"><button>Search</button></form></div>
-<div class="tablebox"><table><thead><tr><th>Equipment</th><th>Manufacturer</th><th>Location</th><th>Service</th><th>Status</th><th>Record</th></tr></thead><tbody>
-{% for r in records %}<tr><td><b>{{r.serial_number}}</b><small>{{r.model_number}}</small></td><td>{{r.manufacturer}}</td><td>{{r.current_location}}</td><td>{{r.service_date}}<small>{{r.service_type}}</small></td><td><span class="status {{r.status|lower|replace(' ','-')}}">{{r.status}}</span></td><td><a href="/record/{{r.id}}">View #{{r.id}} →</a></td></tr>{% else %}<tr><td colspan="6" class="empty">No matching records found.</td></tr>{% endfor %}</tbody></table></div><p class="hint">Showing up to 150 matching records. Sign in to export the full register.</p></section>{% endblock %}
+{% extends "base.html" %}
+{% block title %}MedMaintain | Medical Equipment Maintenance{% endblock %}
+{% block content %}
+{% if current_user.is_authenticated %}
+<section class="dashboard-intro">
+  <div><p class="eyebrow">MEDMAINTAIN WORKSPACE</p><h1>Medical equipment<br><em>maintenance register.</em></h1><p class="lead">Track equipment condition, maintenance activity and service history in one place.</p></div>
+  <a class="button" href="{{ url_for('submit') }}">＋ Add maintenance record</a>
+</section>
+<section class="stats">
+  <div><small>Total records</small><b>{{stats.total}}</b></div><div><small>Operational</small><b>{{stats.operational}}</b></div><div><small>In maintenance</small><b>{{stats.maintenance}}</b></div><div><small>Out of service</small><b>{{stats.out}}</b></div>
+</section>
+<section class="section">
+  <div class="sectionhead"><div><p class="eyebrow">EQUIPMENT REGISTER</p><h2>Equipment and maintenance records</h2></div><form class="search"><input name="q" value="{{q}}" placeholder="Search serial, model, location…"><button>Search</button></form></div>
+  <div class="tablebox"><table><thead><tr><th>Equipment</th><th>Manufacturer</th><th>Location</th><th>Service</th><th>Status</th><th>Record</th></tr></thead><tbody>
+  {% for r in records %}<tr><td><b>{{r.serial_number}}</b><small>{{r.model_number}}</small></td><td>{{r.manufacturer}}</td><td>{{r.current_location}}</td><td>{{r.service_date}}<small>{{r.service_type}}</small></td><td><span class="status {{r.status|lower|replace(' ','-')}}">{{r.status}}</span></td><td><a href="{{ url_for('record_detail',record_id=r.id) }}">View #{{r.id}} →</a></td></tr>{% else %}<tr><td colspan="6" class="empty">No matching records found.</td></tr>{% endfor %}</tbody></table></div><p class="hint">Showing up to 150 matching records. <a href="{{url_for('export_csv')}}">Export the full register</a>.</p>
+</section>
+{% else %}
+<section class="landing-hero">
+  <div class="landing-copy">
+    <p class="eyebrow">BIOMEDICAL ENGINEERING · EQUIPMENT MANAGEMENT</p>
+    <h1>Reliable medical equipment.<br><em>Safer patient care.</em></h1>
+    <p class="landing-lead">Medical equipment maintenance helps healthcare teams keep essential devices safe, accurate and ready when patients need them. MedMaintain supports the people and processes behind dependable healthcare technology.</p>
+    <div class="actions"><a class="button button-large" href="{{url_for('login')}}">Sign in</a><a class="button button-outline button-large" href="{{url_for('register')}}">Create account</a></div>
+    <div class="hero-proof"><span>✓ Equipment reliability</span><span>✓ Maintenance traceability</span><span>✓ Patient safety focus</span></div>
+  </div>
+  <div class="landing-art"><img src="{{url_for('static',filename='maintenance-illustration.svg')}}" alt="Biomedical engineer inspecting a patient monitor and medical equipment"><div class="art-note"><span class="art-pulse"></span><div><b>Care through reliability</b><small>Maintain · Calibrate · Repair</small></div></div></div>
+</section>
+<section class="intro-band"><div><p class="eyebrow">WHY EQUIPMENT MAINTENANCE MATTERS</p><h2>Behind every dependable device is a maintenance process.</h2></div><p>From basic diagnostic tools to complex imaging and life-support systems, medical devices must work correctly and be available when needed. Poor equipment management can delay diagnosis and treatment, while effective maintenance helps reduce downtime and support better care.</p></section>
+<section class="section">
+  <div class="section-heading-center"><p class="eyebrow">THE MAINTENANCE CYCLE</p><h2>Keeping medical technology ready for care</h2><p class="lead">A structured approach throughout the equipment lifecycle.</p></div>
+  <div class="feature-grid">
+    <article class="feature-card"><div class="feature-icon icon-install"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="8" width="30" height="25" rx="3"/><path d="M18 40h12M24 33v7M16 16h16M16 22h9"/></svg></div><h3>Installation and setup</h3><p>Plan the installation, check power and environmental requirements, integrate devices where needed, and test performance before clinical use.</p></article>
+    <article class="feature-card"><div class="feature-icon icon-maintain"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M25 7a14 14 0 0 0-12 21L7 34l7 7 6-6A14 14 0 0 0 41 23l-9 6-8-8 1-14Z"/><path d="m17 18 4 4 8-8"/></svg></div><h3>Preventive maintenance</h3><p>Carry out scheduled inspections, cleaning, part replacement and software updates using manufacturer guidance and equipment usage needs.</p></article>
+    <article class="feature-card"><div class="feature-icon icon-calibrate"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16"/><path d="M24 13v11l8 5M24 4v4M44 24h-4M8 24H4"/></svg></div><h3>Calibration and testing</h3><p>Check and adjust device accuracy, verify safety features and document results so measurements and performance can be trusted.</p></article>
+    <article class="feature-card"><div class="feature-icon icon-repair"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M29 9a12 12 0 0 0-14 15L7 32l9 9 8-8A12 12 0 0 0 39 19l-8 5-8-8Z"/><path d="m15 33 3 3"/></svg></div><h3>Troubleshooting and repair</h3><p>Identify root causes, diagnose hardware or software faults, repair safely and return equipment to service as quickly as possible.</p></article>
+  </div>
+</section>
+<section class="impact-section">
+  <div class="impact-visual"><div class="impact-ring"><svg viewBox="0 0 180 180" aria-hidden="true"><path d="M90 22v25M90 133v25M22 90h25M133 90h25M42 42l18 18M120 120l18 18M138 42l-18 18M60 120l-18 18"/><path d="M90 48c-13-17-42-9-42 14 0 26 42 55 42 55s42-29 42-55c0-23-29-31-42-14Z"/></svg></div></div>
+  <div><p class="eyebrow">THE IMPACT ON PATIENT CARE</p><h2>Less downtime. More dependable care.</h2><p>Well-managed equipment helps reduce interruptions to diagnosis and treatment. Regular maintenance can identify problems early, extend equipment service life and help clinical teams work with devices that are safe and ready for use.</p><ul class="impact-list"><li>Support patient and staff safety</li><li>Improve equipment availability and reliability</li><li>Keep maintenance history for traceability and audits</li><li>Help healthcare facilities use resources efficiently</li></ul></div>
+</section>
+<section class="role-section">
+  <div><p class="eyebrow">THE PEOPLE BEHIND THE TECHNOLOGY</p><h2>Biomedical engineers connect engineering with patient care.</h2><p>Biomedical engineers help select, install, maintain and repair medical devices. They work with clinicians and other teams, document equipment performance, and help users understand safe device operation.</p></div>
+  <div class="role-points"><div><b>01</b><span><strong>Technical expertise</strong><small>Engineering knowledge applied to clinical equipment.</small></span></div><div><b>02</b><span><strong>Clear documentation</strong><small>Service records that support traceability and decisions.</small></span></div><div><b>03</b><span><strong>Continuous learning</strong><small>Keeping pace with evolving devices, software and standards.</small></span></div></div>
+</section>
+<section class="future-band"><div><p class="eyebrow">EVOLVING HEALTHCARE TECHNOLOGY</p><h2>Maintenance for a changing world.</h2><p>Artificial intelligence, robotics and telemedicine are changing healthcare technology. Biomedical engineers increasingly need skills in software, data, connectivity and cybersecurity alongside traditional equipment maintenance.</p><a class="textlink" href="{{url_for('register')}}">Join MedMaintain →</a></div><div class="future-tags"><span>AI-enabled diagnostics</span><span>Robotic systems</span><span>Remote monitoring</span><span>Connected devices</span></div></section>
+<section class="cta-section"><div><p class="eyebrow">MEDMAINTAIN</p><h2>Make equipment maintenance easier to track.</h2><p>Sign in to access the equipment register and maintenance records, or create an account to get started.</p></div><div class="actions"><a class="button button-large" href="{{url_for('login')}}">Sign in</a><a class="button button-outline button-large" href="{{url_for('register')}}">Create account</a></div></section>
+{% endif %}
+{% endblock %}
