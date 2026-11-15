@@ -1,30 +1,21 @@
 {% extends "base.html" %}
 {% block title %}{{'Create account' if mode=='register' else 'Sign in'}} | MedMaintain{% endblock %}
 {% block content %}
-<section class="auth-layout">
-  <aside class="auth-aside">
-    <div class="auth-aside-copy">
-      <span class="auth-mark">✚</span>
-      <p class="eyebrow">BIOMEDICAL ENGINEERING · MEDICAL EQUIPMENT</p>
-      <h1>{{'Build better maintenance habits.' if mode=='register' else 'Welcome back to MedMaintain.'}}</h1>
-      <p>{{'Create your technician account to access equipment records and document maintenance work.' if mode=='register' else 'Sign in to continue managing equipment information, service history and maintenance records.'}}</p>
-      <ul class="auth-benefits">
-        <li><span>✓</span> Equipment register and service history</li>
-        <li><span>✓</span> Preventive and corrective maintenance records</li>
-        <li><span>✓</span> Better equipment traceability</li>
-      </ul>
+<section class="auth-screen">
+  <aside class="auth-visual">
+    <a class="auth-brand" href="{{ url_for('index') }}"><span>✚</span><b>MedMaintain<small>MEDICAL EQUIPMENT MAINTENANCE</small></b></a>
+    <div class="auth-visual-copy">
+      <p class="auth-overline">BIOMEDICAL ENGINEERING · EQUIPMENT CARE</p>
+      <h1>{{'Better maintenance starts here.' if mode=='register' else 'Reliable equipment starts with good care.'}}</h1>
+      <p>{{'Create your technician account to document service work and help keep medical equipment dependable.' if mode=='register' else 'Sign in to access equipment records, maintenance history and the tools your team uses to support reliable healthcare.'}}</p>
     </div>
-    <div class="auth-illustration">
-      <img src="{{url_for('static',filename='maintenance-illustration.svg')}}" alt="Biomedical engineer checking medical equipment">
-      <div class="auth-caption"><span class="art-pulse"></span><span><b>Supporting reliable healthcare technology</b><small>Maintain · Calibrate · Repair</small></span></div>
-    </div>
-    <span class="auth-aside-foot">MEDMAINTAIN · EQUIPMENT RELIABILITY</span>
+    <div class="auth-visual-foot"><span>01</span><span>MAINTAIN · CALIBRATE · REPAIR</span></div>
   </aside>
-  <div class="auth-panel">
-    <div class="auth-panel-inner">
-      <p class="eyebrow">{{'GET STARTED' if mode=='register' else 'SECURE WORKSPACE ACCESS'}}</p>
-      <h2>{{'Create your account' if mode=='register' else 'Sign in'}}</h2>
-      <p class="auth-subtitle">{{'Register as a technician to access the MedMaintain equipment workspace.' if mode=='register' else 'Enter your account details to open your maintenance workspace.'}}</p>
+  <div class="auth-form-side">
+    <div class="auth-form-panel">
+      <p class="auth-form-eyebrow">{{'TECHNICIAN REGISTRATION' if mode=='register' else 'MEDMAINTAIN WORKSPACE'}}</p>
+      <h2>{{'Create account' if mode=='register' else 'Sign in'}}</h2>
+      <p class="auth-form-intro">{{'Set up your technician account to get started.' if mode=='register' else 'Enter your username and password to continue.'}}</p>
       <form method="post" class="auth-form">
         <label for="username">Username
           <input id="username" name="username" required minlength="3" maxlength="80" autocomplete="username" placeholder="Enter your username" autocapitalize="none">
@@ -33,13 +24,14 @@
           <input id="password" type="password" name="password" required minlength="10" autocomplete="{{'new-password' if mode=='register' else 'current-password'}}" placeholder="{{'Create a password (at least 10 characters)' if mode=='register' else 'Enter your password'}}">
         </label>
         {% if mode=='register' %}<p class="password-hint"><span>i</span> Use at least 10 characters for your password.</p>{% endif %}
-        <button class="button auth-submit" type="submit">{{'Create account' if mode=='register' else 'Sign in to MedMaintain'}} <span>→</span></button>
+        <button class="auth-submit" type="submit">{{'CREATE ACCOUNT' if mode=='register' else 'SIGN IN'}} <span>→</span></button>
       </form>
       <div class="auth-switch">
         {% if mode=='register' %}<span>Already have an account?</span> <a href="{{url_for('login')}}">Sign in</a>
-        {% else %}<span>New to MedMaintain?</span> <a href="{{url_for('register')}}">Create an account</a>{% endif %}
+        {% else %}<span>Don't have an account?</span> <a href="{{url_for('register')}}">Create account</a>{% endif %}
       </div>
-      <a class="auth-back" href="{{url_for('index')}}">← Back to homepage</a>
+      <div class="auth-divider"><span>MEDMAINTAIN</span></div>
+      <a class="auth-home-link" href="{{url_for('index')}}">← Back to homepage</a>
     </div>
   </div>
 </section>
