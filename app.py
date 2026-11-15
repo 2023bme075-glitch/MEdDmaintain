@@ -88,6 +88,9 @@ def validate(payload):
 
 @app.get("/")
 def index():
+    # Visitors see the public information homepage, never the equipment register.
+    if not current_user.is_authenticated:
+        return render_template("index.html", records=[], stats=None, q="")
     q=(request.args.get("q") or "").strip()
     query=Equipment.query
     if q:
@@ -145,6 +148,7 @@ def submit():
     return render_template("submit.html", statuses=STATUSES, service_types=SERVICE_TYPES)
 
 @app.get("/record/<int:record_id>")
+@login_required
 def record_detail(record_id):
     record=db.get_or_404(Equipment,record_id)
     return render_template("detail.html",record=record)
