@@ -2,48 +2,96 @@
 {% block title %}MedMaintain | Medical Equipment Maintenance{% endblock %}
 {% block content %}
 {% if current_user.is_authenticated %}
-<section class="dashboard-intro">
-  <div><p class="eyebrow">MEDMAINTAIN WORKSPACE</p><h1>Medical equipment<br><em>maintenance register.</em></h1><p class="lead">Track equipment condition, maintenance activity and service history in one place.</p></div>
-  <a class="button" href="{{ url_for('submit') }}">＋ Add maintenance record</a>
+<section class="dashboard-welcome">
+  <div class="dashboard-welcome-copy">
+    <p class="eyebrow">YOUR MEDMAINTAIN WORKSPACE</p>
+    <h1>Good work starts with <em>reliable equipment.</em></h1>
+    <p class="lead">Keep equipment information, service history and maintenance updates organized in one workspace.</p>
+    <div class="dashboard-actions">
+      <a class="button" href="{{ url_for('submit') }}">＋ Submit maintenance</a>
+      <a class="button button-outline" href="{{ url_for('export_csv') }}">Export records</a>
+    </div>
+  </div>
+  <div class="dashboard-welcome-image">
+    <img src="{{ url_for('static', filename='biomedical-maintenance-hero.webp') }}" alt="Biomedical technician checking a patient monitor">
+  </div>
 </section>
-<section class="stats">
-  <div><small>Total records</small><b>{{stats.total}}</b></div><div><small>Operational</small><b>{{stats.operational}}</b></div><div><small>In maintenance</small><b>{{stats.maintenance}}</b></div><div><small>Out of service</small><b>{{stats.out}}</b></div>
+
+<section class="workspace-overview">
+  <div class="sectionhead">
+    <div><p class="eyebrow">WORKSPACE OVERVIEW</p><h2>Equipment at a glance</h2></div>
+    <p class="overview-note">A live summary of the records currently saved in MedMaintain.</p>
+  </div>
+  <div class="stats">
+    <div class="stat-card stat-total"><small>Total records</small><b>{{stats.total}}</b><span>Equipment records in the register</span></div>
+    <div class="stat-card stat-operational"><small>Operational</small><b>{{stats.operational}}</b><span>Marked as operational</span></div>
+    <div class="stat-card stat-maintenance"><small>In maintenance</small><b>{{stats.maintenance}}</b><span>Currently being serviced</span></div>
+    <div class="stat-card stat-out"><small>Out of service</small><b>{{stats.out}}</b><span>Requires attention</span></div>
+  </div>
 </section>
-<section class="section">
-  <div class="sectionhead"><div><p class="eyebrow">EQUIPMENT REGISTER</p><h2>Equipment and maintenance records</h2></div><form class="search"><input name="q" value="{{q}}" placeholder="Search serial, model, location…"><button>Search</button></form></div>
+
+<section class="section register-section">
+  <div class="sectionhead">
+    <div><p class="eyebrow">EQUIPMENT REGISTER</p><h2>Equipment and maintenance records</h2><p class="section-description">Search the register to review equipment details and its latest recorded service.</p></div>
+    <form class="search" method="get" action="{{ url_for('index') }}"><input name="q" value="{{q}}" placeholder="Search serial, model or location…" aria-label="Search equipment"><button type="submit">Search</button></form>
+  </div>
   <div class="tablebox"><table><thead><tr><th>Equipment</th><th>Manufacturer</th><th>Location</th><th>Service</th><th>Status</th><th>Record</th></tr></thead><tbody>
-  {% for r in records %}<tr><td><b>{{r.serial_number}}</b><small>{{r.model_number}}</small></td><td>{{r.manufacturer}}</td><td>{{r.current_location}}</td><td>{{r.service_date}}<small>{{r.service_type}}</small></td><td><span class="status {{r.status|lower|replace(' ','-')}}">{{r.status}}</span></td><td><a href="{{ url_for('record_detail',record_id=r.id) }}">View #{{r.id}} →</a></td></tr>{% else %}<tr><td colspan="6" class="empty">No matching records found.</td></tr>{% endfor %}</tbody></table></div><p class="hint">Showing up to 150 matching records. <a href="{{url_for('export_csv')}}">Export the full register</a>.</p>
+  {% for r in records %}<tr><td><b>{{r.serial_number}}</b><small>{{r.model_number}}</small></td><td>{{r.manufacturer}}</td><td>{{r.current_location}}</td><td>{{r.service_date}}<small>{{r.service_type}}</small></td><td><span class="status {{r.status|lower|replace(' ','-')}}">{{r.status}}</span></td><td><a href="{{ url_for('record_detail',record_id=r.id) }}">View #{{r.id}} →</a></td></tr>{% else %}<tr><td colspan="6" class="empty">No matching records found. Add a maintenance entry to get started.</td></tr>{% endfor %}</tbody></table></div>
+  <p class="hint">Showing up to 150 matching records. <a href="{{url_for('export_csv')}}">Export the full register</a>.</p>
+</section>
+<section class="workspace-tip">
+  <div><p class="eyebrow">A GOOD RECORD IS A USEFUL RECORD</p><h2>Keep every service entry clear and complete.</h2></div>
+  <ul><li>Confirm the equipment serial and model numbers.</li><li>Record the service date, type and current status.</li><li>Describe faults, actions taken and relevant location changes.</li></ul>
+  <a class="textlink" href="{{ url_for('submit') }}">Create a maintenance entry →</a>
 </section>
 {% else %}
 <section class="landing-hero">
   <div class="landing-copy">
     <p class="eyebrow">BIOMEDICAL ENGINEERING · EQUIPMENT MANAGEMENT</p>
     <h1>Reliable medical equipment.<br><em>Safer patient care.</em></h1>
-    <p class="landing-lead">Medical equipment maintenance helps healthcare teams keep essential devices safe, accurate and ready when patients need them. MedMaintain supports the people and processes behind dependable healthcare technology.</p>
+    <p class="landing-lead">Medical equipment must be safe, accurate and ready when patients need it. MedMaintain is designed to help biomedical teams keep equipment records and maintenance activity organized.</p>
+    <ul class="hero-benefits">
+      <li>Keep equipment information and service history together</li>
+      <li>Support preventive maintenance and timely repairs</li>
+      <li>Improve traceability of equipment condition and service work</li>
+    </ul>
     <div class="actions"><a class="button button-large" href="{{url_for('login')}}">Sign in</a><a class="button button-outline button-large" href="{{url_for('register')}}">Create account</a></div>
-    <div class="hero-proof"><span>✓ Equipment reliability</span><span>✓ Maintenance traceability</span><span>✓ Patient safety focus</span></div>
   </div>
-  <div class="landing-art"><img src="{{url_for('static',filename='maintenance-illustration.svg')}}" alt="Biomedical engineer inspecting a patient monitor and medical equipment"><div class="art-note"><span class="art-pulse"></span><div><b>Care through reliability</b><small>Maintain · Calibrate · Repair</small></div></div></div>
+  <div class="landing-art">
+    <img src="{{ url_for('static', filename='biomedical-maintenance-hero.webp') }}" alt="Biomedical engineer inspecting and servicing a patient monitor">
+    <div class="art-note"><span class="art-pulse"></span><div><b>Care through reliability</b><small>Maintain · Calibrate · Repair</small></div></div>
+  </div>
 </section>
-<section class="intro-band" id="why-maintenance"><div><p class="eyebrow">WHY EQUIPMENT MAINTENANCE MATTERS</p><h2>Behind every dependable device is a maintenance process.</h2></div><p>From basic diagnostic tools to complex imaging and life-support systems, medical devices must work correctly and be available when needed. Poor equipment management can delay diagnosis and treatment, while effective maintenance helps reduce downtime and support better care.</p></section>
-<section class="section">
-  <div class="section-heading-center"><p class="eyebrow">THE MAINTENANCE CYCLE</p><h2>Keeping medical technology ready for care</h2><p class="lead">A structured approach throughout the equipment lifecycle.</p></div>
+
+<section class="intro-band" id="why-maintenance">
+  <div><p class="eyebrow">WHY MAINTENANCE MATTERS</p><h2>Medical equipment is part of the care team.</h2></div>
+  <div><p>Equipment supports diagnosis, monitoring and treatment. A structured maintenance programme helps healthcare facilities:</p>
+    <ul class="clean-bullets"><li>Keep devices safe and fit for their intended use.</li><li>Identify faults before they cause avoidable interruptions.</li><li>Maintain reliable measurements and device performance.</li><li>Document service history for follow-up and accountability.</li></ul>
+  </div>
+</section>
+
+<section class="section maintenance-cycle">
+  <div class="section-heading-center"><p class="eyebrow">THE MAINTENANCE CYCLE</p><h2>Four important parts of equipment care</h2><p class="lead">Maintenance begins before a device enters clinical use and continues throughout its service life.</p></div>
   <div class="feature-grid">
-    <article class="feature-card"><div class="feature-icon icon-install"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="8" width="30" height="25" rx="3"/><path d="M18 40h12M24 33v7M16 16h16M16 22h9"/></svg></div><h3>Installation and setup</h3><p>Plan the installation, check power and environmental requirements, integrate devices where needed, and test performance before clinical use.</p></article>
-    <article class="feature-card"><div class="feature-icon icon-maintain"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M25 7a14 14 0 0 0-12 21L7 34l7 7 6-6A14 14 0 0 0 41 23l-9 6-8-8 1-14Z"/><path d="m17 18 4 4 8-8"/></svg></div><h3>Preventive maintenance</h3><p>Carry out scheduled inspections, cleaning, part replacement and software updates using manufacturer guidance and equipment usage needs.</p></article>
-    <article class="feature-card"><div class="feature-icon icon-calibrate"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16"/><path d="M24 13v11l8 5M24 4v4M44 24h-4M8 24H4"/></svg></div><h3>Calibration and testing</h3><p>Check and adjust device accuracy, verify safety features and document results so measurements and performance can be trusted.</p></article>
-    <article class="feature-card"><div class="feature-icon icon-repair"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M29 9a12 12 0 0 0-14 15L7 32l9 9 8-8A12 12 0 0 0 39 19l-8 5-8-8Z"/><path d="m15 33 3 3"/></svg></div><h3>Troubleshooting and repair</h3><p>Identify root causes, diagnose hardware or software faults, repair safely and return equipment to service as quickly as possible.</p></article>
+    <article class="feature-card"><div class="feature-icon icon-install"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="8" width="30" height="25" rx="3"/><path d="M18 40h12M24 33v7M16 16h16M16 22h9"/></svg></div><h3>1. Installation and setup</h3><p>Prepare equipment for safe use.</p><ul><li>Check site, power and environmental requirements.</li><li>Install and configure the device.</li><li>Test operation before clinical use.</li></ul></article>
+    <article class="feature-card"><div class="feature-icon icon-maintain"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M25 7a14 14 0 0 0-12 21L7 34l7 7 6-6A14 14 0 0 0 41 23l-9 6-8-8 1-14Z"/><path d="m17 18 4 4 8-8"/></svg></div><h3>2. Preventive maintenance</h3><p>Reduce the likelihood of equipment failure.</p><ul><li>Perform planned inspections and cleaning.</li><li>Replace worn parts when required.</li><li>Follow manufacturer recommendations.</li></ul></article>
+    <article class="feature-card"><div class="feature-icon icon-calibrate"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16"/><path d="M24 13v11l8 5M24 4v4M44 24h-4M8 24H4"/></svg></div><h3>3. Calibration and testing</h3><p>Check accuracy and safe performance.</p><ul><li>Verify measurements against references.</li><li>Test alarms and safety functions.</li><li>Record results and adjustments.</li></ul></article>
+    <article class="feature-card"><div class="feature-icon icon-repair"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M29 9a12 12 0 0 0-14 15L7 32l9 9 8-8A12 12 0 0 0 39 19l-8 5-8-8Z"/><path d="m15 33 3 3"/></svg></div><h3>4. Troubleshooting and repair</h3><p>Restore devices when faults occur.</p><ul><li>Identify and diagnose the fault.</li><li>Repair or replace faulty components.</li><li>Verify performance before return to use.</li></ul></article>
   </div>
 </section>
+
 <section class="impact-section">
   <div class="impact-visual"><div class="impact-ring"><svg viewBox="0 0 180 180" aria-hidden="true"><path d="M90 22v25M90 133v25M22 90h25M133 90h25M42 42l18 18M120 120l18 18M138 42l-18 18M60 120l-18 18"/><path d="M90 48c-13-17-42-9-42 14 0 26 42 55 42 55s42-29 42-55c0-23-29-31-42-14Z"/></svg></div></div>
-  <div><p class="eyebrow">THE IMPACT ON PATIENT CARE</p><h2>Less downtime. More dependable care.</h2><p>Well-managed equipment helps reduce interruptions to diagnosis and treatment. Regular maintenance can identify problems early, extend equipment service life and help clinical teams work with devices that are safe and ready for use.</p><ul class="impact-list"><li>Support patient and staff safety</li><li>Improve equipment availability and reliability</li><li>Keep maintenance history for traceability and audits</li><li>Help healthcare facilities use resources efficiently</li></ul></div>
+  <div><p class="eyebrow">THE OUTCOME</p><h2>Better equipment care supports better healthcare.</h2><p>Consistent maintenance supports reliable devices and helps clinical teams plan around equipment needs.</p><ul class="impact-list"><li>Patient and staff safety</li><li>Equipment availability</li><li>Longer useful service life</li><li>Traceable service history</li></ul></div>
 </section>
+
 <section class="role-section">
-  <div><p class="eyebrow">THE PEOPLE BEHIND THE TECHNOLOGY</p><h2>Biomedical engineers connect engineering with patient care.</h2><p>Biomedical engineers help select, install, maintain and repair medical devices. They work with clinicians and other teams, document equipment performance, and help users understand safe device operation.</p></div>
-  <div class="role-points"><div><b>01</b><span><strong>Technical expertise</strong><small>Engineering knowledge applied to clinical equipment.</small></span></div><div><b>02</b><span><strong>Clear documentation</strong><small>Service records that support traceability and decisions.</small></span></div><div><b>03</b><span><strong>Continuous learning</strong><small>Keeping pace with evolving devices, software and standards.</small></span></div></div>
+  <div><p class="eyebrow">BIOMEDICAL ENGINEERING</p><h2>Engineering knowledge in service of patient care.</h2><p>Biomedical engineers work with clinical teams to manage the technology used in healthcare facilities. Their work includes:</p><ul class="clean-bullets"><li>Advising on equipment selection and installation.</li><li>Inspecting, testing, maintaining and repairing devices.</li><li>Keeping accurate technical and service records.</li><li>Supporting users in the safe operation of equipment.</li></ul></div>
+  <div class="role-points"><div><b>01</b><span><strong>Technical expertise</strong><small>Apply engineering principles to clinical equipment.</small></span></div><div><b>02</b><span><strong>Clear documentation</strong><small>Record work so service history can be followed.</small></span></div><div><b>03</b><span><strong>Continuous learning</strong><small>Adapt to new devices, software and connected systems.</small></span></div></div>
 </section>
-<section class="future-band"><div><p class="eyebrow">EVOLVING HEALTHCARE TECHNOLOGY</p><h2>Maintenance for a changing world.</h2><p>Artificial intelligence, robotics and telemedicine are changing healthcare technology. Biomedical engineers increasingly need skills in software, data, connectivity and cybersecurity alongside traditional equipment maintenance.</p><a class="textlink" href="{{url_for('register')}}">Join MedMaintain →</a></div><div class="future-tags"><span>AI-enabled diagnostics</span><span>Robotic systems</span><span>Remote monitoring</span><span>Connected devices</span></div></section>
-<section class="cta-section"><div><p class="eyebrow">MEDMAINTAIN</p><h2>Make equipment maintenance easier to track.</h2><p>Sign in to access the equipment register and maintenance records, or create an account to get started.</p></div><div class="actions"><a class="button button-large" href="{{url_for('login')}}">Sign in</a><a class="button button-outline button-large" href="{{url_for('register')}}">Create account</a></div></section>
+
+<section class="future-band"><div><p class="eyebrow">EVOLVING HEALTHCARE TECHNOLOGY</p><h2>Maintenance keeps moving forward.</h2><p>New technologies are changing how medical devices are used and supported. Biomedical teams increasingly work with:</p><div class="future-tags"><span>AI-enabled diagnostics</span><span>Robotic systems</span><span>Remote monitoring</span><span>Connected devices</span><span>Medical software</span></div></div><div class="future-side-note">Good maintenance combines sound engineering practice, careful documentation and ongoing learning.</div></section>
+
+<section class="cta-section"><div><p class="eyebrow">MEDMAINTAIN</p><h2>Bring equipment information and maintenance records together.</h2><p>Sign in to access the equipment register, or create a technician account to begin recording maintenance activity.</p></div><div class="actions"><a class="button button-large" href="{{url_for('login')}}">Sign in</a><a class="button button-outline button-large" href="{{url_for('register')}}">Create account</a></div></section>
 {% endif %}
 {% endblock %}
