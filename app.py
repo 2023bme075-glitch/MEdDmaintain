@@ -163,10 +163,12 @@ def delete_record(record_id):
 
 @app.get("/api/equipment")
 def api_list():
-    # Public read access; notebook sync is optionally protected by a dedicated API key.
-    supplied=request.headers.get("X-API-Key")
+    # Notebook synchronization is available only with the configured API key.
+    supplied=request.headers.get("X-API-Key","")
     required=os.environ.get("NOTEBOOK_API_KEY")
-    if required and supplied != required:
+    if not required:
+        return jsonify({"ok":False,"error":"Notebook API access is not configured."}),503
+    if not secrets.compare_digest(supplied,required):
         return jsonify({"ok":False,"error":"Valid X-API-Key required for notebook synchronization."}),401
     since_id=request.args.get("since_id",default=0,type=int)
     records=Equipment.query.filter(Equipment.id>since_id).order_by(Equipment.id.asc()).all()
@@ -174,6 +176,12 @@ def api_list():
 
 @app.get("/api/equipment/<int:record_id>")
 def api_one(record_id):
+    supplied=request.headers.get("X-API-Key","")
+    required=os.environ.get("NOTEBOOK_API_KEY")
+    if not required:
+        return jsonify({"ok":False,"error":"Notebook API access is not configured."}),503
+    if not secrets.compare_digest(supplied,required):
+        return jsonify({"ok":False,"error":"Valid X-API-Key required for notebook synchronization."}),401
     record=db.get_or_404(Equipment,record_id)
     return jsonify({"ok":True,"record":record.as_dict()})
 
