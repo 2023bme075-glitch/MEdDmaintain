@@ -281,3 +281,8 @@ body:has(.auth-screen)>.container>.flash{position:relative;z-index:5;width:min(5
  .auth-form-side{min-height:auto;padding:48px 28px 55px}
  .auth-form-intro{margin-bottom:30px}
 }
+
+
+/* Realistic photographic maintenance-stage images */
+.maintenance-stage-card .stage-image{padding:0;overflow:hidden;background:#eaf3f1}
+.maintenance-stage-card .stage-image img{width:100%;height:100%;object-fit:cover;object-position:center}
