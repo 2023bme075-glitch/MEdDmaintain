@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}Initial owner setup | MedMaintain{% endblock %}{% block content %}
+<section class="section formsection" style="max-width:650px;margin:6vh auto">
+<p class="eyebrow">PRIVATE ONE-TIME SETUP</p><h1>Create the MedMaintain owner account</h1>
+<p class="lead">This page is available only before the first owner account exists and only when the private setup token and designated owner email have been configured by the site operator.</p>
+<form method="post" class="entryform">
+<label>One-time setup token<input type="password" name="setup_token" required autocomplete="off"></label>
+<label>Owner username<input name="username" value="medmaintain_owner" required minlength="3" maxlength="80"></label>
+<label>Designated owner email<input type="email" name="email" required autocomplete="email"></label>
+<label>New password<input type="password" name="password" required minlength="14" autocomplete="new-password"></label>
+<p class="auth-password-hint">Use a unique password of at least 14 characters. Never share the setup token or password.</p>
+<button class="button" type="submit">Create owner account →</button>
+</form></section>{% endblock %}
