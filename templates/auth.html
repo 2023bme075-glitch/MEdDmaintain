@@ -1,23 +1,24 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Create account' if mode == 'register' else 'Sign in' }} | MedMaintain{% endblock %}
+{% block title %}{{ 'Create technician account' if mode == 'register' else 'Sign in' }} | MedMaintain{% endblock %}
 {% block content %}
 <section class="auth-screen">
 <aside class="auth-visual">
 <a class="auth-brand" href="{{ url_for('index') }}"><span class="auth-brand-mark">✚</span><span class="auth-brand-name">MedMaintain<small>MEDICAL EQUIPMENT MAINTENANCE</small></span></a>
 <div class="auth-visual-copy"><p class="auth-overline">BIOMEDICAL ENGINEERING · EQUIPMENT CARE</p>
 <h1>{% if mode == 'register' %}Join the team keeping medical equipment reliable.{% else %}Reliable medical equipment. Safer patient care.{% endif %}</h1>
-<p>{% if mode == 'register' %}Create your technician account to document maintenance, manage equipment information and support dependable healthcare services.{% else %}Access equipment records, maintenance histories and the tools you need to support safe, reliable healthcare equipment.{% endif %}</p></div>
+<p>{% if mode == 'register' %}Create a technician account using your approved organization email. A supervisor must approve new accounts before access is granted.{% else %}Access equipment records, maintenance histories and the tools you need to support safe, reliable healthcare equipment.{% endif %}</p></div>
 <div class="auth-visual-foot"><span>01</span><span>MAINTAIN · CALIBRATE · REPAIR</span></div>
 </aside>
 <section class="auth-form-side" aria-label="{{ 'Create account' if mode == 'register' else 'Sign in' }}"><div class="auth-form-panel">
 <p class="auth-form-eyebrow">WELCOME TO MEDMAINTAIN</p><h2>{{ 'Create account' if mode == 'register' else 'Sign in' }}</h2>
-<p class="auth-form-intro">{% if mode == 'register' %}Register to access the MedMaintain workspace.{% else %}Enter your account details to continue.{% endif %}</p>
+<p class="auth-form-intro">{% if mode == 'register' %}Technician registration is restricted to approved organization email domains.{% else %}Enter your account details to continue.{% endif %}</p>
 <form method="POST" class="auth-form">
 <label for="username">Username<input type="text" id="username" name="username" required minlength="3" maxlength="80" autocomplete="username" autocapitalize="none" placeholder="Enter your username"></label>
-<label for="password">Password<span class="password-field"><input type="password" id="password" name="password" required {% if mode == 'register' %}minlength="10"{% endif %} autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" placeholder="Enter your password"><button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">Show</button></span></label>
-{% if mode == 'register' %}<p class="auth-password-hint">Use at least 10 characters for your password.</p>{% else %}<p class="auth-help-note">If you have forgotten your password, contact your administrator.</p>{% endif %}
-<button class="auth-submit" type="submit">{{ 'CREATE ACCOUNT' if mode == 'register' else 'SIGN IN' }}<span aria-hidden="true">→</span></button></form>
-<p class="auth-switch">{% if mode == 'register' %}Already have an account? <a href="{{ url_for('login') }}">Sign in</a>{% else %}Don't have an account? <a href="{{ url_for('register') }}">Create account</a>{% endif %}</p>
+{% if mode == 'register' %}<label for="email">Organization email<input type="email" id="email" name="email" required maxlength="254" autocomplete="email" placeholder="name@your-organization.org"></label>{% endif %}
+<label for="password">Password<span class="password-field"><input type="password" id="password" name="password" required {% if mode == 'register' %}minlength="12"{% endif %} autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" placeholder="Enter your password"><button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">Show</button></span></label>
+{% if mode == 'register' %}<p class="auth-password-hint">Use at least 12 characters. Your account remains pending until supervisor approval.</p>{% else %}<p class="auth-help-note">If you have forgotten your password, contact your system supervisor.</p>{% endif %}
+<button class="auth-submit" type="submit">{{ 'SUBMIT REGISTRATION' if mode == 'register' else 'SIGN IN' }}<span aria-hidden="true">→</span></button></form>
+<p class="auth-switch">{% if mode == 'register' %}Already have an account? <a href="{{ url_for('login') }}">Sign in</a>{% else %}Need an account? <a href="{{ url_for('register') }}">Register</a>{% endif %}</p>
 <div class="auth-divider"><span>OR</span></div><a class="auth-home-link" href="{{ url_for('index') }}">← Back to homepage</a>
 </div></section></section>
 <script>(function(){const p=document.getElementById("password"),b=document.getElementById("togglePassword");if(!p||!b)return;b.addEventListener("click",function(){const show=p.type==="password";p.type=show?"text":"password";b.textContent=show?"Hide":"Show";b.setAttribute("aria-label",show?"Hide password":"Show password");});})();</script>
