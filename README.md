@@ -2,9 +2,7 @@
 
 ## Access model
 - Anyone can open the public website and view/search the equipment register.
-- Anyone can create a technician account; signing in is required to submit maintenance records and export CSV.
-- The first administrator account is created from the `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables at startup.
-- Administrators can promote technicians to administrators and delete records.
+- Technician registration is restricted to `ALLOWED_EMAIL_DOMAINS`; new accounts require supervisor approval. The initial owner is created once through `/owner-setup` using a private one-time `OWNER_SETUP_TOKEN` and the exact `OWNER_EMAIL`. Supervisors review new maintenance records before they appear in the approved register. Only the owner can assign supervisor privileges.
 - The notebook sync API is protected by `NOTEBOOK_API_KEY` when configured.
 
 ## Project structure
@@ -25,8 +23,9 @@ pip install -r requirements.txt
 
 Set the following environment variables before starting the app:
 - `SECRET_KEY` — long random value used to protect sessions.
-- `ADMIN_USERNAME` — initial administrator username.
-- `ADMIN_PASSWORD` — strong initial administrator password (at least 10 characters).
+- `ALLOWED_EMAIL_DOMAINS` — comma-separated approved email domains for technician registration.
+- `OWNER_EMAIL` — exact email address reserved for the initial owner setup.
+- `OWNER_SETUP_TOKEN` — one-time random secret of at least 32 characters, configured privately and removed after owner setup.
 - `NOTEBOOK_API_KEY` — long random key used by notebook synchronization.
 
 Then run:
@@ -38,7 +37,7 @@ Open http://127.0.0.1:5000
 ## Public deployment
 The repository includes a `Procfile` for hosts that support Python web services and a `render.yaml` Blueprint configuration. **Check the hosting provider's current prices and database limits before deploying:** the current Render Blueprint specifies paid service/database plans and is not a guaranteed free deployment. A GitHub repository alone does not make the Flask website publicly accessible.
 
-When deploying, configure `SECRET_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` and `NOTEBOOK_API_KEY` as private environment variables in the hosting dashboard. Never commit real passwords or API keys to GitHub.
+When deploying, configure `SECRET_KEY`, `ALLOWED_EMAIL_DOMAINS`, `OWNER_EMAIL`, `OWNER_SETUP_TOKEN` and `NOTEBOOK_API_KEY` as private environment variables in the hosting dashboard. Never commit real passwords or API keys to GitHub.
 
 
 ## Deploy on PythonAnywhere's free plan (no card)
@@ -91,3 +90,14 @@ Run `notebook_sync.py` from a cell in the Jupyter notebook after setting `WEBSIT
 
 ## Safety and privacy
 The public register exposes equipment information. Do not enter patient identifiers, patient notes, passwords, or other sensitive personal data. Establish organization-specific privacy, backup, access-control and retention policies before production use. The current app supports one shared register, not separate hospital tenants.
+
+
+## Account security and supervisor workflow
+1. In the PythonAnywhere WSGI configuration, set `ALLOWED_EMAIL_DOMAINS` to the comma-separated domains approved by your institution(s), for example `hospital.org,university.ac.ug`. Use the exact domains your organization authorizes. If this variable is missing, new technician registration is disabled.
+2. Set `OWNER_EMAIL` to the exact email address that will belong to the site owner. Set `OWNER_SETUP_TOKEN` to a newly generated random secret of at least 32 characters. Keep both values private; never put them in GitHub or chat.
+3. Reload the app, then open the private setup address `/owner-setup`. Enter the token, designated email, a username (default suggestion: `medmaintain_owner`) and a unique password of at least 14 characters. The first owner account is created only once.
+4. Immediately remove `OWNER_SETUP_TOKEN` from the WSGI configuration and reload the app. The setup page is also permanently disabled after an owner account exists.
+5. Technicians register with an approved organization email and wait for approval. The owner can appoint supervisors from **Owner controls**. Supervisors approve technician accounts and approve or return maintenance entries from the **Supervisor portal**.
+6. Notebook POST submissions are also queued for supervisor review. The notebook GET endpoint returns approved records only.
+
+The domain allowlist checks the email address's domain; it does not independently prove control of that mailbox. The private one-time owner token is the proof of control for initial owner creation. If mailbox ownership verification is required for technicians, add an organization email-verification service before enabling registration. The additive database migration preserves existing accounts and treats legacy accounts/records as approved; review those existing accounts after upgrading.
