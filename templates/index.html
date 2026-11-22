@@ -17,6 +17,7 @@
   </div>
 </section>
 
+{% if current_user.role in ['owner','supervisor','admin'] and pending_count %}<div class="flash">There are {{pending_count}} maintenance entries awaiting review. <a href="{{url_for('supervisor_portal')}}">Open the supervisor portal</a>.</div>{% endif %}
 <section class="workspace-overview">
   <div class="sectionhead">
     <div><p class="eyebrow">WORKSPACE OVERVIEW</p><h2>Equipment at a glance</h2></div>
@@ -35,8 +36,8 @@
     <div><p class="eyebrow">EQUIPMENT REGISTER</p><h2>Equipment and maintenance records</h2><p class="section-description">Search the register to review equipment details and its latest recorded service.</p></div>
     <form class="search" method="get" action="{{ url_for('index') }}"><input name="q" value="{{q}}" placeholder="Search serial, model or location…" aria-label="Search equipment"><button type="submit">Search</button></form>
   </div>
-  <div class="tablebox"><table><thead><tr><th>Equipment</th><th>Manufacturer</th><th>Location</th><th>Service</th><th>Status</th><th>Record</th></tr></thead><tbody>
-  {% for r in records %}<tr><td><b>{{r.serial_number}}</b><small>{{r.model_number}}</small></td><td>{{r.manufacturer}}</td><td>{{r.current_location}}</td><td>{{r.service_date}}<small>{{r.service_type}}</small></td><td><span class="status {{r.status|lower|replace(' ','-')}}">{{r.status}}</span></td><td><a href="{{ url_for('record_detail',record_id=r.id) }}">View #{{r.id}} →</a></td></tr>{% else %}<tr><td colspan="6" class="empty">No matching records found. Add a maintenance entry to get started.</td></tr>{% endfor %}</tbody></table></div>
+  <div class="tablebox"><table><thead><tr><th>Equipment</th><th>Manufacturer</th><th>Location</th><th>Service</th><th>Status</th><th>Review</th><th>Record</th></tr></thead><tbody>
+  {% for r in records %}<tr><td><b>{{r.serial_number}}</b><small>{{r.model_number}}</small></td><td>{{r.manufacturer}}</td><td>{{r.current_location}}</td><td>{{r.service_date}}<small>{{r.service_type}}</small></td><td><span class="status {{r.status|lower|replace(' ','-')}}">{{r.status}}</span></td><td>{{r.review_status|title}}</td><td><a href="{{ url_for('record_detail',record_id=r.id) }}">View #{{r.id}} →</a></td></tr>{% else %}<tr><td colspan="7" class="empty">No matching records found. Add a maintenance entry to get started.</td></tr>{% endfor %}</tbody></table></div>
   <p class="hint">Showing up to 150 matching records. <a href="{{url_for('export_csv')}}">Export the full register</a>.</p>
 </section>
 <section class="workspace-tip">
