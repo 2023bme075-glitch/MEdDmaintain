@@ -5,28 +5,31 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import inspect, text
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-before-deployment")
 db_url = os.environ.get("DATABASE_URL", "sqlite:///medmaintain.db")
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+if db_url.startswith("postgres://"): db_url = db_url.replace("postgres://", "postgresql://", 1)
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
-login_manager.login_message = "Please sign in to submit or manage maintenance records."
+login_manager.login_message = "Please sign in to continue."
 
 STATUSES = ["Operational", "In Maintenance", "Out of Service", "Standby", "Decommissioned"]
 SERVICE_TYPES = ["Preventive Maintenance", "Corrective Maintenance", "Calibration", "Inspection", "Repair", "Software Update", "Installation", "Other"]
+PRIVILEGED_ROLES = ("owner", "supervisor", "admin")
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(254), unique=True, nullable=True)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), default="technician", nullable=False)
+    is_approved = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     def set_password(self, password): self.password_hash = generate_password_hash(password)
     def check_password(self, password): return check_password_hash(self.password_hash, password)
@@ -45,184 +48,283 @@ class Equipment(db.Model):
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     submitted_by = db.Column(db.String(80), default="system")
     source = db.Column(db.String(30), default="website")
+    review_status = db.Column(db.String(20), default="pending", nullable=False)
+    reviewed_by = db.Column(db.String(80))
+    reviewed_at = db.Column(db.DateTime)
     def as_dict(self):
         return {"id":self.id,"serial_number":self.serial_number,"model_number":self.model_number,
-                "manufacturer":self.manufacturer,"current_location":self.current_location,
-                "past_locations":self.past_locations,"service_date":self.service_date,
-                "service_type":self.service_type,"status":self.status,"issues":self.issues,
-                "submitted_at":self.submitted_at.isoformat()+"Z","submitted_by":self.submitted_by,"source":self.source}
+          "manufacturer":self.manufacturer,"current_location":self.current_location,"past_locations":self.past_locations,
+          "service_date":self.service_date,"service_type":self.service_type,"status":self.status,"issues":self.issues,
+          "submitted_at":self.submitted_at.isoformat()+"Z","submitted_by":self.submitted_by,"source":self.source,
+          "review_status":self.review_status}
+
+class AuditLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    actor = db.Column(db.String(80), nullable=False)
+    action = db.Column(db.String(80), nullable=False)
+    target_type = db.Column(db.String(40), nullable=False)
+    target_id = db.Column(db.Integer)
+    details = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 @login_manager.user_loader
 def load_user(user_id): return db.session.get(User, int(user_id))
 
-def admin_required(fn):
+def supervisor_required(fn):
     @wraps(fn)
     @login_required
     def wrapped(*args, **kwargs):
-        if current_user.role != "admin": abort(403)
+        if current_user.role not in PRIVILEGED_ROLES: abort(403)
         return fn(*args, **kwargs)
     return wrapped
 
-def get_payload():
-    return request.get_json(silent=True) if request.is_json else request.form
+def owner_required(fn):
+    @wraps(fn)
+    @login_required
+    def wrapped(*args, **kwargs):
+        if current_user.role != "owner": abort(403)
+        return fn(*args, **kwargs)
+    return wrapped
+
+def get_payload(): return request.get_json(silent=True) if request.is_json else request.form
+
+def allowed_domains():
+    return {d.strip().lower().lstrip("@") for d in os.environ.get("ALLOWED_EMAIL_DOMAINS", "").split(",") if d.strip()}
+
+def email_allowed(email):
+    email = (email or "").strip().lower()
+    if "@" not in email: return False
+    domain = email.rsplit("@",1)[1]
+    return bool(allowed_domains()) and domain in allowed_domains()
+
+def audit(actor, action, target_type, target_id=None, details=None):
+    db.session.add(AuditLog(actor=actor, action=action, target_type=target_type, target_id=target_id, details=details))
 
 def validate(payload):
-    p = payload or {}
-    serial = (p.get("serial_number") or "").strip()
-    model = (p.get("model_number") or "").strip()
-    status = (p.get("status") or "Operational").strip()
-    service_type = (p.get("service_type") or "N/A").strip()
-    service_date = (p.get("service_date") or "").strip() or "N/A"
-    if not serial or not model: return None, "Serial number and model number are required."
-    if status not in STATUSES: return None, "Choose a valid equipment status."
-    if service_type != "N/A" and service_type not in SERVICE_TYPES: return None, "Choose a valid service type."
-    if service_date != "N/A":
+    p=payload or {}
+    serial=(p.get("serial_number") or "").strip(); model=(p.get("model_number") or "").strip()
+    status=(p.get("status") or "Operational").strip(); service_type=(p.get("service_type") or "N/A").strip()
+    service_date=(p.get("service_date") or "").strip() or "N/A"
+    if not serial or not model: return None,"Serial number and model number are required."
+    if status not in STATUSES: return None,"Choose a valid equipment status."
+    if service_type!="N/A" and service_type not in SERVICE_TYPES: return None,"Choose a valid service type."
+    if service_date!="N/A":
         try: date.fromisoformat(service_date)
-        except ValueError: return None, "Service date must be YYYY-MM-DD."
-    return dict(serial_number=serial, model_number=model,
-        manufacturer=(p.get("manufacturer") or "").strip() or "N/A",
-        current_location=(p.get("current_location") or "").strip() or "N/A",
-        past_locations=(p.get("past_locations") or "").strip() or "N/A",
-        service_date=service_date, service_type=service_type,
-        status=status, issues=(p.get("issues") or "").strip() or "N/A"), None
+        except ValueError: return None,"Service date must be YYYY-MM-DD."
+    return dict(serial_number=serial,model_number=model,manufacturer=(p.get("manufacturer") or "").strip() or "N/A",
+      current_location=(p.get("current_location") or "").strip() or "N/A",past_locations=(p.get("past_locations") or "").strip() or "N/A",
+      service_date=service_date,service_type=service_type,status=status,issues=(p.get("issues") or "").strip() or "N/A"),None
 
 @app.get("/")
 def index():
-    # Visitors see the public information homepage, never the equipment register.
-    if not current_user.is_authenticated:
-        return render_template("index.html", records=[], stats=None, q="")
+    if not current_user.is_authenticated: return render_template("index.html",records=[],stats=None,q="")
     q=(request.args.get("q") or "").strip()
     query=Equipment.query
+    if current_user.role not in PRIVILEGED_ROLES: query=query.filter_by(review_status="approved")
     if q:
         like=f"%{q}%"
-        query=query.filter(db.or_(Equipment.serial_number.ilike(like), Equipment.model_number.ilike(like),
-                                  Equipment.manufacturer.ilike(like), Equipment.current_location.ilike(like)))
+        query=query.filter(db.or_(Equipment.serial_number.ilike(like),Equipment.model_number.ilike(like),Equipment.manufacturer.ilike(like),Equipment.current_location.ilike(like)))
     records=query.order_by(Equipment.submitted_at.desc()).limit(150).all()
-    stats={"total":Equipment.query.count(),
-           "operational":Equipment.query.filter_by(status="Operational").count(),
-           "maintenance":Equipment.query.filter_by(status="In Maintenance").count(),
-           "out":Equipment.query.filter_by(status="Out of Service").count()}
-    return render_template("index.html", records=records, stats=stats, q=q)
+    stats={"total":query.count(),"operational":query.filter_by(status="Operational").count(),
+      "maintenance":query.filter_by(status="In Maintenance").count(),"out":query.filter_by(status="Out of Service").count()}
+    pending=Equipment.query.filter_by(review_status="pending").count() if current_user.role in PRIVILEGED_ROLES else 0
+    return render_template("index.html",records=records,stats=stats,q=q,pending_count=pending)
 
-@app.route("/register", methods=["GET","POST"])
+@app.route("/register",methods=["GET","POST"])
 def register():
     if request.method=="POST":
         username=(request.form.get("username") or "").strip()
+        email=(request.form.get("email") or "").strip().lower()
         password=request.form.get("password") or ""
-        if len(username)<3 or len(password)<10:
-            flash("Use a username of at least 3 characters and a password of at least 10 characters.","error")
-        elif User.query.filter_by(username=username).first():
-            flash("That username is already registered.","error")
+        if len(username)<3 or len(password)<12: flash("Use a username of at least 3 characters and a password of at least 12 characters.","error")
+        elif not email_allowed(email): flash("Registration is limited to approved organization email domains. Contact the system supervisor if your domain should be added.","error")
+        elif User.query.filter(db.or_(User.username==username,User.email==email)).first(): flash("That username or email is already registered.","error")
         else:
-            user=User(username=username,role="technician"); user.set_password(password)
-            db.session.add(user); db.session.commit()
-            login_user(user); flash("Account created. You can now submit maintenance entries.","success")
-            return redirect(url_for("index"))
-    return render_template("auth.html", mode="register")
+            user=User(username=username,email=email,role="technician",is_approved=False); user.set_password(password)
+            db.session.add(user); audit(username,"account_registered","user",details=email); db.session.commit()
+            flash("Registration received. Your account is pending supervisor approval.","success")
+            return redirect(url_for("login"))
+    return render_template("auth.html",mode="register")
 
-@app.route("/login", methods=["GET","POST"])
+@app.route("/login",methods=["GET","POST"])
 def login():
     if request.method=="POST":
         user=User.query.filter_by(username=(request.form.get("username") or "").strip()).first()
         if user and user.check_password(request.form.get("password") or ""):
+            if not user.is_approved and user.role not in PRIVILEGED_ROLES:
+                flash("Your account is awaiting supervisor approval.","error")
+                return redirect(url_for("login"))
             login_user(user); return redirect(request.args.get("next") or url_for("index"))
         flash("Incorrect username or password.","error")
-    return render_template("auth.html", mode="login")
+    return render_template("auth.html",mode="login")
+
+@app.route("/owner-setup",methods=["GET","POST"])
+def owner_setup():
+    if User.query.filter_by(role="owner").first():
+        abort(404)
+    setup_token=os.environ.get("OWNER_SETUP_TOKEN","")
+    owner_email=(os.environ.get("OWNER_EMAIL","") or "").strip().lower()
+    if not setup_token or len(setup_token)<32 or not owner_email:
+        abort(404)
+    if request.method=="POST":
+        supplied=request.form.get("setup_token","")
+        username=(request.form.get("username") or "medmaintain_owner").strip()
+        email=(request.form.get("email") or "").strip().lower()
+        password=request.form.get("password") or ""
+        if not secrets.compare_digest(supplied,setup_token): flash("Invalid setup authorization.","error")
+        elif not secrets.compare_digest(email,owner_email): flash("The email does not match the designated owner email.","error")
+        elif len(username)<3 or len(password)<14: flash("Use a username of at least 3 characters and a password of at least 14 characters.","error")
+        elif User.query.filter(db.or_(User.username==username,User.email==email)).first(): flash("That username or email is already in use.","error")
+        else:
+            user=User(username=username,email=email,role="owner",is_approved=True); user.set_password(password)
+            db.session.add(user); audit(username,"initial_owner_created","user",details=email); db.session.commit()
+            login_user(user)
+            flash("Owner account created. Remove OWNER_SETUP_TOKEN from your private hosting configuration now.","success")
+            return redirect(url_for("supervisor_portal"))
+    return render_template("owner_setup.html")
 
 @app.get("/logout")
 @login_required
-def logout():
-    logout_user(); return redirect(url_for("index"))
+def logout(): logout_user(); return redirect(url_for("index"))
 
-@app.route("/submit", methods=["GET","POST"])
+@app.route("/submit",methods=["GET","POST"])
 @login_required
 def submit():
     if request.method=="POST":
         values,error=validate(get_payload())
         if error: flash(error,"error")
         else:
-            record=Equipment(**values,submitted_by=current_user.username,source="website")
-            db.session.add(record); db.session.commit()
-            flash(f"Maintenance entry saved (record #{record.id}).","success")
+            record=Equipment(**values,submitted_by=current_user.username,source="website",review_status="pending")
+            db.session.add(record); db.session.flush()
+            audit(current_user.username,"record_submitted","equipment",record.id)
+            db.session.commit()
+            flash(f"Entry submitted for supervisor review (record #{record.id}).","success")
             return redirect(url_for("record_detail",record_id=record.id))
-    return render_template("submit.html", statuses=STATUSES, service_types=SERVICE_TYPES)
+    return render_template("submit.html",statuses=STATUSES,service_types=SERVICE_TYPES)
 
 @app.get("/record/<int:record_id>")
 @login_required
 def record_detail(record_id):
     record=db.get_or_404(Equipment,record_id)
+    if record.review_status!="approved" and current_user.role not in PRIVILEGED_ROLES and record.submitted_by!=current_user.username: abort(403)
     return render_template("detail.html",record=record)
 
-@app.route("/record/<int:record_id>/delete",methods=["POST"])
-@admin_required
-def delete_record(record_id):
+@app.post("/record/<int:record_id>/review")
+@supervisor_required
+def review_record(record_id):
     record=db.get_or_404(Equipment,record_id)
-    db.session.delete(record); db.session.commit()
-    flash("Record deleted.","success")
-    return redirect(url_for("index"))
+    action=request.form.get("action")
+    if action not in ("approve","return"): abort(400)
+    record.review_status="approved" if action=="approve" else "returned"
+    record.reviewed_by=current_user.username; record.reviewed_at=datetime.utcnow()
+    audit(current_user.username,"record_"+action,"equipment",record.id,request.form.get("note","")[:1000])
+    db.session.commit(); flash(f"Record #{record.id} {('approved' if action=='approve' else 'returned for correction')}.","success")
+    return redirect(url_for("supervisor_portal"))
 
-@app.get("/api/equipment")
-def api_list():
-    # Notebook synchronization is available only with the configured API key.
-    supplied=request.headers.get("X-API-Key","")
-    required=os.environ.get("NOTEBOOK_API_KEY")
-    if not required:
-        return jsonify({"ok":False,"error":"Notebook API access is not configured."}),503
-    if not secrets.compare_digest(supplied,required):
-        return jsonify({"ok":False,"error":"Valid X-API-Key required for notebook synchronization."}),401
-    since_id=request.args.get("since_id",default=0,type=int)
-    records=Equipment.query.filter(Equipment.id>since_id).order_by(Equipment.id.asc()).all()
-    return jsonify({"ok":True,"count":len(records),"records":[r.as_dict() for r in records]})
+@app.get("/supervisor")
+@supervisor_required
+def supervisor_portal():
+    pending_records=Equipment.query.filter_by(review_status="pending").order_by(Equipment.submitted_at.asc()).all()
+    pending_users=User.query.filter_by(is_approved=False).order_by(User.created_at.asc()).all()
+    logs=AuditLog.query.order_by(AuditLog.created_at.desc()).limit(100).all()
+    return render_template("supervisor.html",pending_records=pending_records,pending_users=pending_users,logs=logs)
 
-@app.get("/api/equipment/<int:record_id>")
-def api_one(record_id):
-    supplied=request.headers.get("X-API-Key","")
-    required=os.environ.get("NOTEBOOK_API_KEY")
-    if not required:
-        return jsonify({"ok":False,"error":"Notebook API access is not configured."}),503
-    if not secrets.compare_digest(supplied,required):
-        return jsonify({"ok":False,"error":"Valid X-API-Key required for notebook synchronization."}),401
-    record=db.get_or_404(Equipment,record_id)
-    return jsonify({"ok":True,"record":record.as_dict()})
+@app.post("/supervisor/users/<int:user_id>/approve")
+@supervisor_required
+def approve_user(user_id):
+    user=db.get_or_404(User,user_id)
+    if user.role!="technician": abort(400)
+    user.is_approved=True; audit(current_user.username,"account_approved","user",user.id); db.session.commit()
+    flash(f"Account {user.username} approved.","success"); return redirect(url_for("supervisor_portal"))
 
-@app.get("/export.csv")
-@login_required
-def export_csv():
-    output=io.StringIO()
-    fields=["id","serial_number","model_number","manufacturer","current_location","past_locations","service_date","service_type","status","issues","submitted_at","submitted_by","source"]
-    writer=csv.DictWriter(output,fieldnames=fields); writer.writeheader()
-    for r in Equipment.query.order_by(Equipment.id.desc()).all(): writer.writerow(r.as_dict())
-    return Response(output.getvalue(),mimetype="text/csv",headers={"Content-Disposition":"attachment; filename=medical_equipment_register.csv"})
+@app.post("/supervisor/users/<int:user_id>/role")
+@owner_required
+def owner_change_role(user_id):
+    user=db.get_or_404(User,user_id)
+    role=request.form.get("role")
+    if user.role=="owner" or role not in ("technician","supervisor"): abort(400)
+    user.role=role; audit(current_user.username,"role_changed","user",user.id,role); db.session.commit()
+    flash("User role updated.","success"); return redirect(url_for("supervisor_portal"))
 
 @app.get("/admin")
-@admin_required
+@supervisor_required
 def admin():
     users=User.query.order_by(User.created_at.desc()).all()
     return render_template("admin.html",users=users)
 
 @app.post("/admin/users/<int:user_id>/role")
-@admin_required
+@owner_required
 def change_role(user_id):
-    user=db.get_or_404(User,user_id)
-    if user.id==current_user.id:
-        flash("You cannot change your own role here.","error")
-    else:
-        role=request.form.get("role")
-        if role in ["admin","technician"]:
-            user.role=role; db.session.commit(); flash("User role updated.","success")
-    return redirect(url_for("admin"))
+    user=db.get_or_404(User,user_id); role=request.form.get("role")
+    if user.role=="owner" or role not in ("technician","supervisor"): abort(400)
+    user.role=role; audit(current_user.username,"role_changed","user",user.id,role); db.session.commit()
+    flash("User role updated.","success"); return redirect(url_for("admin"))
+
+@app.get("/export.csv")
+@login_required
+def export_csv():
+    query=Equipment.query
+    if current_user.role not in PRIVILEGED_ROLES: query=query.filter_by(review_status="approved")
+    output=io.StringIO(); fields=["id","serial_number","model_number","manufacturer","current_location","past_locations","service_date","service_type","status","issues","submitted_at","submitted_by","source","review_status"]
+    writer=csv.DictWriter(output,fieldnames=fields); writer.writeheader()
+    for r in query.order_by(Equipment.id.desc()).all():
+        row=r.as_dict(); writer.writerow({k:row.get(k,"") for k in fields})
+    return Response(output.getvalue(),mimetype="text/csv",headers={"Content-Disposition":"attachment; filename=medical_equipment_register.csv"})
+
+def api_authorized():
+    required=os.environ.get("NOTEBOOK_API_KEY",""); supplied=request.headers.get("X-API-Key","")
+    return bool(required) and secrets.compare_digest(supplied,required)
+
+@app.route("/api/equipment",methods=["GET","POST"])
+def api_equipment():
+    if not os.environ.get("NOTEBOOK_API_KEY"): return jsonify({"ok":False,"error":"Notebook API access is not configured."}),503
+    if not api_authorized(): return jsonify({"ok":False,"error":"Valid X-API-Key required."}),401
+    if request.method=="POST":
+        values,error=validate(request.get_json(silent=True))
+        if error: return jsonify({"ok":False,"error":error}),400
+        record=Equipment(**values,submitted_by="notebook",source="notebook",review_status="pending")
+        db.session.add(record); db.session.flush(); audit("notebook","record_submitted","equipment",record.id); db.session.commit()
+        return jsonify({"ok":True,"record":record.as_dict(),"message":"Entry queued for supervisor review."}),201
+    since_id=request.args.get("since_id",default=0,type=int)
+    query=Equipment.query.filter(Equipment.id>since_id,Equipment.review_status=="approved")
+    records=query.order_by(Equipment.id.asc()).all()
+    return jsonify({"ok":True,"count":len(records),"records":[r.as_dict() for r in records]})
+
+@app.get("/api/equipment/<int:record_id>")
+def api_one(record_id):
+    if not os.environ.get("NOTEBOOK_API_KEY"): return jsonify({"ok":False,"error":"Notebook API access is not configured."}),503
+    if not api_authorized(): return jsonify({"ok":False,"error":"Valid X-API-Key required."}),401
+    record=db.get_or_404(Equipment,record_id)
+    if record.review_status!="approved": return jsonify({"ok":False,"error":"Record is not approved."}),403
+    return jsonify({"ok":True,"record":record.as_dict()})
 
 @app.get("/health")
 def health(): return jsonify({"ok":True,"service":"MedMaintain"})
 
+def migrate_existing_database():
+    # Additive migration for existing SQLite/PostgreSQL installations; existing records remain visible.
+    inspector=inspect(db.engine)
+    tables=inspector.get_table_names()
+    if "user" in tables:
+        cols={c["name"] for c in inspector.get_columns("user")}
+        dialect=db.engine.dialect.name
+        additions={"email":"VARCHAR(254)","is_approved":"BOOLEAN NOT NULL DEFAULT TRUE"}
+        for name,definition in additions.items():
+            if name not in cols: db.session.execute(text(f"ALTER TABLE \"user\" ADD COLUMN {name} {definition}"))
+    if "equipment" in tables:
+        cols={c["name"] for c in inspector.get_columns("equipment")}
+        additions={"review_status":"VARCHAR(20) NOT NULL DEFAULT 'approved'","reviewed_by":"VARCHAR(80)","reviewed_at":"TIMESTAMP"}
+        for name,definition in additions.items():
+            if name not in cols: db.session.execute(text(f"ALTER TABLE equipment ADD COLUMN {name} {definition}"))
+    db.session.commit()
+
 with app.app_context():
     db.create_all()
-    # First admin is created only when both environment variables are supplied.
-    admin_name=os.environ.get("ADMIN_USERNAME")
-    admin_password=os.environ.get("ADMIN_PASSWORD")
+    migrate_existing_database()
+    # Legacy administrator accounts retain supervisory access after this update.
+    admin_name=os.environ.get("ADMIN_USERNAME"); admin_password=os.environ.get("ADMIN_PASSWORD")
     if admin_name and admin_password and not User.query.filter_by(username=admin_name).first():
-        admin_user=User(username=admin_name,role="admin")
-        admin_user.set_password(admin_password); db.session.add(admin_user); db.session.commit()
+        admin_user=User(username=admin_name,role="admin",is_approved=True); admin_user.set_password(admin_password)
+        db.session.add(admin_user); db.session.commit()
 
-if __name__=="__main__":
-    app.run(host="0.0.0.0",port=int(os.environ.get("PORT",5000)),debug=False)
+if __name__=="__main__": app.run(host="0.0.0.0",port=int(os.environ.get("PORT",5000)),debug=False)
