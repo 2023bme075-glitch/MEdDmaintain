@@ -260,6 +260,29 @@ def change_role(user_id):
     user.role=role; audit(current_user.username,"role_changed","user",user.id,role); db.session.commit()
     flash("User role updated.","success"); return redirect(url_for("admin"))
 
+@app.post("/record/<int:record_id>/delete")
+@supervisor_required
+def delete_record(record_id):
+    record=db.get_or_404(Equipment,record_id)
+    audit(current_user.username,"record_deleted","equipment",record.id,record.serial_number)
+    db.session.delete(record); db.session.commit()
+    flash("Record deleted.","success")
+    return redirect(url_for("index"))
+
+@app.post("/owner/transfer/<int:user_id>")
+@owner_required
+def transfer_owner(user_id):
+    successor=db.get_or_404(User,user_id)
+    if successor.role!="supervisor" or not successor.is_approved:
+        abort(400)
+    old_owner=current_user
+    old_owner.role="supervisor"
+    successor.role="owner"
+    audit(old_owner.username,"owner_role_transferred","user",successor.id,successor.username)
+    db.session.commit()
+    flash("Owner role transferred. Your account now has supervisor access.","success")
+    return redirect(url_for("supervisor_portal"))
+
 @app.get("/export.csv")
 @login_required
 def export_csv():
