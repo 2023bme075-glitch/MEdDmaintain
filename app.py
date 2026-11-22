@@ -1,7 +1,7 @@
 import os, csv, io, secrets
 from datetime import datetime, date
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response, abort, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -30,6 +30,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), default="technician", nullable=False)
     is_approved = db.Column(db.Boolean, default=False, nullable=False)
+    auth_token = db.Column(db.String(64), default=lambda: secrets.token_urlsafe(32), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     def set_password(self, password): self.password_hash = generate_password_hash(password)
     def check_password(self, password): return check_password_hash(self.password_hash, password)
@@ -68,7 +69,15 @@ class AuditLog(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
 @login_manager.user_loader
-def load_user(user_id): return db.session.get(User, int(user_id))
+def load_user(user_id):
+    user = db.session.get(User, int(user_id))
+    if user is None:
+        return None
+    # Require the browser session to carry this account's current database token.
+    saved_token = session.get("auth_token")
+    if not saved_token or not secrets.compare_digest(saved_token, user.auth_token or ""):
+        return None
+    return user
 
 def supervisor_required(fn):
     @wraps(fn)
@@ -154,7 +163,8 @@ def login():
             if not user.is_approved and user.role not in PRIVILEGED_ROLES:
                 flash("Your account is awaiting supervisor approval.","error")
                 return redirect(url_for("login"))
-            login_user(user); return redirect(request.args.get("next") or url_for("index"))
+            login_user(user); session["auth_token"] = user.auth_token
+            return redirect(request.args.get("next") or url_for("index"))
         flash("Incorrect username or password.","error")
     return render_template("auth.html",mode="login")
 
@@ -178,7 +188,7 @@ def owner_setup():
         else:
             user=User(username=username,email=email,role="owner",is_approved=True); user.set_password(password)
             db.session.add(user); audit(username,"initial_owner_created","user",details=email); db.session.commit()
-            login_user(user)
+            login_user(user); session["auth_token"] = user.auth_token
             flash("Owner account created. Remove OWNER_SETUP_TOKEN from your private hosting configuration now.","success")
             return redirect(url_for("supervisor_portal"))
     return render_template("owner_setup.html")
@@ -349,9 +359,12 @@ def migrate_existing_database():
     if "user" in tables:
         cols={c["name"] for c in inspector.get_columns("user")}
         dialect=db.engine.dialect.name
-        additions={"email":"VARCHAR(254)","is_approved":"BOOLEAN NOT NULL DEFAULT TRUE"}
+        additions={"email":"VARCHAR(254)","is_approved":"BOOLEAN NOT NULL DEFAULT TRUE","auth_token":"VARCHAR(64)"}
         for name,definition in additions.items():
             if name not in cols: db.session.execute(text(f"ALTER TABLE \"user\" ADD COLUMN {name} {definition}"))
+        # Existing accounts receive tokens; old sessions must sign in again.
+        for existing_user in User.query.filter(User.auth_token.is_(None)).all():
+            existing_user.auth_token = secrets.token_urlsafe(32)
     if "equipment" in tables:
         cols={c["name"] for c in inspector.get_columns("equipment")}
         additions={"review_status":"VARCHAR(20) NOT NULL DEFAULT 'approved'","reviewed_by":"VARCHAR(80)","reviewed_at":"TIMESTAMP"}
