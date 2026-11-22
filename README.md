@@ -65,8 +65,9 @@ The application uses SQLite by default, so a PostgreSQL service is not required 
        sys.path.insert(0, project_home)
 
    os.environ["SECRET_KEY"] = "REPLACE_WITH_A_LONG_RANDOM_SECRET"
-   os.environ["ADMIN_USERNAME"] = "REPLACE_WITH_YOUR_ADMIN_USERNAME"
-   os.environ["ADMIN_PASSWORD"] = "REPLACE_WITH_A_LONG_UNIQUE_PASSWORD"
+   os.environ["ALLOWED_EMAIL_DOMAINS"] = "your-approved-hospital.org,your-university.ac.ug"
+   os.environ["OWNER_EMAIL"] = "your-owner-email@your-organization.org"
+   os.environ["OWNER_SETUP_TOKEN"] = "REPLACE_WITH_A_RANDOM_SECRET_OF_AT_LEAST_32_CHARACTERS"
    os.environ["NOTEBOOK_API_KEY"] = "REPLACE_WITH_ANOTHER_LONG_RANDOM_SECRET"
 
    from app import app as application
@@ -74,7 +75,7 @@ The application uses SQLite by default, so a PostgreSQL service is not required 
    Keep these real secrets in the private WSGI configuration only. Do not commit them to GitHub or share them in chat.
 6. In the Web tab's **Virtualenv** field, enter `/home/yourusername/MEdDmaintain/.venv`.
 7. Under **Static files**, add URL `/static/` mapped to `/home/yourusername/MEdDmaintain/static/`.
-8. Click **Reload**, then open `https://yourusername.pythonanywhere.com/health`. A working app returns JSON containing `"ok": true`; then open the home page and sign in using the administrator credentials you set above.
+8. Click **Reload**, then open `https://yourusername.pythonanywhere.com/health`. A working app returns JSON containing `"ok": true`; then open the home page and open `/owner-setup` and create the owner account using the private setup token and designated owner email you configured above. Remove `OWNER_SETUP_TOKEN` from the WSGI file and reload immediately after the account is created.
 9. In the Jupyter notebook, set `WEBSITE_API_URL` to your new HTTPS website address and use the same `NOTEBOOK_API_KEY` value. Run the notebook sync cell when you want to import new records.
 
 **Free-plan limitations:** PythonAnywhere currently lists one web app, 512 MiB of disk, and a one-month web-app expiry/renewal requirement for free accounts. New free accounts also have restricted outbound internet and do not include MySQL or scheduled tasks. The app's SQLite database is stored on the persistent account filesystem; download backups regularly. Visit the provider's current plan page before relying on the service for operational or clinical use.
