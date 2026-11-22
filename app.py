@@ -269,6 +269,24 @@ def delete_record(record_id):
     flash("Record deleted.","success")
     return redirect(url_for("index"))
 
+@app.post("/admin/users/<int:user_id>/delete")
+@owner_required
+def delete_user(user_id):
+    user = db.get_or_404(User, user_id)
+    # Protect the active owner session and every owner account from deletion.
+    if user.id == current_user.id or user.role == "owner":
+        abort(400)
+    username = user.username
+    email = user.email or ""
+    role = user.role
+    audit(current_user.username, "user_deleted", "user", user.id,
+          f"username={username}; email={email}; role={role}")
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"User account {username} was deleted.", "success")
+    return redirect(url_for("admin"))
+
+
 @app.post("/owner/transfer/<int:user_id>")
 @owner_required
 def transfer_owner(user_id):
