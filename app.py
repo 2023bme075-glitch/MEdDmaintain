@@ -40,6 +40,7 @@ class User(UserMixin, db.Model):
     auth_token = db.Column(db.String(64), default=lambda: secrets.token_urlsafe(32), nullable=False)
     display_name = db.Column(db.String(80), nullable=True)
     profile_image = db.Column(db.String(80), nullable=True)
+    language_preference = db.Column(db.String(2), default="default", nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     def set_password(self, password): self.password_hash = generate_password_hash(password)
     def check_password(self, password): return check_password_hash(self.password_hash, password)
@@ -67,6 +68,10 @@ class Equipment(db.Model):
           "service_date":self.service_date,"service_type":self.service_type,"status":self.status,"issues":self.issues,
           "submitted_at":self.submitted_at.isoformat()+"Z","submitted_by":self.submitted_by,"source":self.source,
           "review_status":self.review_status}
+
+class SystemSetting(db.Model):
+    key = db.Column(db.String(80), primary_key=True)
+    value = db.Column(db.String(120), nullable=False)
 
 class AuditLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -206,6 +211,19 @@ def owner_setup():
 @login_required
 def logout(): logout_user(); return redirect(url_for("index"))
 
+LANGUAGES = {"en": "English", "lg": "Luganda", "sw": "Kiswahili"}
+TRANSLATIONS = {"lg":{"WORKSPACE":"EKIFO KY’OMULIMU","My profile":"Ebikwata ku nze","Dashboard":"Olubaawo lw’amawulire","Equipment register":"Ebyuma ebiri mu lukalala","New maintenance entry":"Wandiika omulimu omupya","Export records":"Fulumya ebiwandiiko","MANAGEMENT":"ENFUGA","Supervisor portal":"Ekifo ky’omulabirizi","Owner controls":"Enteekateeka za nnannyini nkola","Workspace active":"Ekifo kikola","Sign out":"Fuluma","Language preference":"Olulimi lw’oyagala","Save language preference":"Tereka olulimi lw’oyagala","Use system default":"Olulimi oluteekeddwawo","Display name":"Erinnya erirabika","Profile picture":"Ekifaananyi ky’omuntu","Save profile changes":"Tereka enkyukakyuka","Username":"Erinnya ly’okuyingira","Email address":"Endagiriro ya email","Account role":"Omulimu gwo","Account status":"Embeera ya akawunti","Change password":"Kyusa ekigambo ky’okuyingira","Current password":"Ekigambo ky’okuyingira ekiriwo","New password":"Ekigambo ekipya eky’okuyingira","Confirm new password":"Ddamu ekigambo ekipya","Update password":"Kyusa ekigambo ky’okuyingira","Equipment at a glance":"Ebyuma mu bufunze","Total records":"Ebiwandiiko byonna","Operational":"Kikola","In maintenance":"Kirabirirwa","Out of service":"Tekikola","Serial number":"Namba ey’enjawulo","Model number":"Namba ya model","Manufacturer":"Omukozi w’ekyuma","Current location":"Ekifo ekiriwo","Past locations":"Ebifo eby’edda","Service date":"Olunaku lw’okulabirira","Service type":"Ekika ky’omulimu","Status":"Embeera","Review status":"Embeera y’okukebera","Approve entry":"Kkiriza ekiwandiiko","Return for correction":"Zzaayo okutereeza","Back to register":"Ddayo ku lukalala","Owner default language":"Olulimi oluteekebwawo nnannyini nkola","Save system language":"Tereka olulimi lw’enkola"},"sw":{"WORKSPACE":"ENEO LA KAZI","My profile":"Wasifu wangu","Dashboard":"Dashibodi","Equipment register":"Daftari la vifaa","New maintenance entry":"Ingiza matengenezo mapya","Export records":"Hamisha rekodi","MANAGEMENT":"USIMAMIZI","Supervisor portal":"Jukwaa la msimamizi","Owner controls":"Mipangilio ya mmiliki","Workspace active":"Mfumo unafanya kazi","Sign out":"Toka","Language preference":"Lugha unayopendelea","Save language preference":"Hifadhi lugha unayopendelea","Use system default":"Tumia lugha ya mfumo","Display name":"Jina la kuonyesha","Profile picture":"Picha ya wasifu","Save profile changes":"Hifadhi mabadiliko","Username":"Jina la mtumiaji","Email address":"Anwani ya barua pepe","Account role":"Jukumu la akaunti","Account status":"Hali ya akaunti","Change password":"Badilisha nenosiri","Current password":"Nenosiri la sasa","New password":"Nenosiri jipya","Confirm new password":"Thibitisha nenosiri jipya","Update password":"Sasisha nenosiri","Equipment at a glance":"Muhtasari wa vifaa","Total records":"Jumla ya rekodi","Operational":"Inafanya kazi","In maintenance":"Inafanyiwa matengenezo","Out of service":"Haifanyi kazi","Serial number":"Namba ya mfululizo","Model number":"Namba ya modeli","Manufacturer":"Mtengenezaji","Current location":"Mahali pa sasa","Past locations":"Mahali pa awali","Service date":"Tarehe ya huduma","Service type":"Aina ya huduma","Status":"Hali","Review status":"Hali ya ukaguzi","Approve entry":"Idhinisha ingizo","Return for correction":"Rudisha kwa marekebisho","Back to register":"Rudi kwenye daftari","Owner default language":"Lugha-msingi ya mmiliki","Save system language":"Hifadhi lugha ya mfumo"}}
+
+def current_language():
+    setting = db.session.get(SystemSetting, "default_language")
+    default = setting.value if setting and setting.value in LANGUAGES else "en"
+    if current_user.is_authenticated and current_user.language_preference in LANGUAGES:
+        return current_user.language_preference
+    return default
+
+def translate(message):
+    return TRANSLATIONS.get(current_language(), {}).get(message, message)
+
 def profile_csrf_token():
     token = session.get("profile_csrf_token")
     if not token:
@@ -215,7 +233,7 @@ def profile_csrf_token():
 
 @app.context_processor
 def inject_profile_helpers():
-    return {"profile_csrf_token": profile_csrf_token}
+    return {"profile_csrf_token": profile_csrf_token, "tr": translate, "current_language": current_language, "language_options": LANGUAGES}
 
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
@@ -226,6 +244,15 @@ def profile():
         if not expected or not secrets.compare_digest(supplied, expected):
             abort(400, description="Your profile form expired. Refresh the page and try again.")
         action = request.form.get("action", "details")
+        if action == "language":
+            choice = request.form.get("language_preference", "default")
+            if choice != "default" and choice not in LANGUAGES:
+                abort(400)
+            current_user.language_preference = choice
+            audit(current_user.username, "language_preference_changed", "user", current_user.id, choice)
+            db.session.commit()
+            flash("Your language preference has been saved.", "success")
+            return redirect(url_for("profile"))
         if action == "password":
             current_password = request.form.get("current_password", "")
             new_password = request.form.get("new_password", "")
@@ -368,7 +395,24 @@ def owner_change_role(user_id):
 @supervisor_required
 def admin():
     users=User.query.order_by(User.created_at.desc()).all()
-    return render_template("admin.html",users=users)
+    setting = db.session.get(SystemSetting, "default_language")
+    return render_template("admin.html",users=users,system_default_language=setting.value if setting else "en")
+
+@app.post("/admin/language")
+@owner_required
+def set_default_language():
+    choice = request.form.get("default_language", "en")
+    if choice not in LANGUAGES:
+        abort(400)
+    setting = db.session.get(SystemSetting, "default_language")
+    if setting is None:
+        db.session.add(SystemSetting(key="default_language", value=choice))
+    else:
+        setting.value = choice
+    audit(current_user.username, "system_default_language_changed", "system", details=choice)
+    db.session.commit()
+    flash("The system default language has been updated.", "success")
+    return redirect(url_for("admin"))
 
 @app.post("/admin/users/<int:user_id>/role")
 @owner_required
@@ -467,7 +511,7 @@ def migrate_existing_database():
     if "user" in tables:
         cols={c["name"] for c in inspector.get_columns("user")}
         dialect=db.engine.dialect.name
-        additions={"email":"VARCHAR(254)","is_approved":"BOOLEAN NOT NULL DEFAULT TRUE","auth_token":"VARCHAR(64)","display_name":"VARCHAR(80)","profile_image":"VARCHAR(80)"}
+        additions={"email":"VARCHAR(254)","is_approved":"BOOLEAN NOT NULL DEFAULT TRUE","auth_token":"VARCHAR(64)","display_name":"VARCHAR(80)","profile_image":"VARCHAR(80)","language_preference":"VARCHAR(2) NOT NULL DEFAULT 'default'"}
         for name,definition in additions.items():
             if name not in cols: db.session.execute(text(f"ALTER TABLE \"user\" ADD COLUMN {name} {definition}"))
         # Existing accounts receive tokens; old sessions must sign in again.
