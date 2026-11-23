@@ -1,11 +1,13 @@
 import os, csv, io, secrets
+from pathlib import Path
 from datetime import datetime, date
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response, abort, session
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response, abort, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import inspect, text
+from PIL import Image, UnidentifiedImageError
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-before-deployment")
@@ -13,6 +15,9 @@ db_url = os.environ.get("DATABASE_URL", "sqlite:///medmaintain.db")
 if db_url.startswith("postgres://"): db_url = db_url.replace("postgres://", "postgresql://", 1)
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
+PROFILE_IMAGE_DIR = Path(app.instance_path) / "profile_images"
+PROFILE_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -31,6 +36,8 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default="technician", nullable=False)
     is_approved = db.Column(db.Boolean, default=False, nullable=False)
     auth_token = db.Column(db.String(64), default=lambda: secrets.token_urlsafe(32), nullable=False)
+    display_name = db.Column(db.String(80), nullable=True)
+    profile_image = db.Column(db.String(80), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     def set_password(self, password): self.password_hash = generate_password_hash(password)
     def check_password(self, password): return check_password_hash(self.password_hash, password)
@@ -197,6 +204,105 @@ def owner_setup():
 @login_required
 def logout(): logout_user(); return redirect(url_for("index"))
 
+def profile_csrf_token():
+    token = session.get("profile_csrf_token")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["profile_csrf_token"] = token
+    return token
+
+@app.context_processor
+def inject_profile_helpers():
+    return {"profile_csrf_token": profile_csrf_token}
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    if request.method == "POST":
+        supplied = request.form.get("csrf_token", "")
+        expected = session.get("profile_csrf_token", "")
+        if not expected or not secrets.compare_digest(supplied, expected):
+            abort(400, description="Your profile form expired. Refresh the page and try again.")
+        action = request.form.get("action", "details")
+        if action == "password":
+            current_password = request.form.get("current_password", "")
+            new_password = request.form.get("new_password", "")
+            confirm_password = request.form.get("confirm_password", "")
+            if not current_user.check_password(current_password):
+                flash("Your current password is incorrect.", "error")
+            elif len(new_password) < 12:
+                flash("Your new password must contain at least 12 characters.", "error")
+            elif new_password != confirm_password:
+                flash("The new passwords do not match.", "error")
+            elif current_user.check_password(new_password):
+                flash("Choose a password different from your current password.", "error")
+            else:
+                current_user.set_password(new_password)
+                current_user.auth_token = secrets.token_urlsafe(32)
+                audit(current_user.username, "password_changed", "user", current_user.id)
+                db.session.commit()
+                session["auth_token"] = current_user.auth_token
+                session["profile_csrf_token"] = secrets.token_urlsafe(32)
+                flash("Your password has been changed successfully.", "success")
+                return redirect(url_for("profile"))
+        elif action == "details":
+            display_name = (request.form.get("display_name") or "").strip()
+            if len(display_name) > 80:
+                flash("Display name must be 80 characters or fewer.", "error")
+            else:
+                new_image = None
+                upload = request.files.get("profile_image")
+                remove_image = request.form.get("remove_image") == "yes"
+                if upload and upload.filename:
+                    if len(upload.read()) > app.config["MAX_CONTENT_LENGTH"]:
+                        flash("The image must be 2 MB or smaller.", "error")
+                        return redirect(url_for("profile"))
+                    upload.stream.seek(0)
+                    try:
+                        image = Image.open(upload.stream)
+                        if image.format not in ("JPEG", "PNG", "WEBP") or getattr(image, "n_frames", 1) != 1:
+                            raise ValueError("Unsupported image")
+                        image.verify()
+                        upload.stream.seek(0)
+                        image = Image.open(upload.stream)
+                        image.thumbnail((512, 512))
+                        if image.mode not in ("RGB", "RGBA"):
+                            image = image.convert("RGB")
+                        new_image = secrets.token_hex(16) + ".webp"
+                        image.save(PROFILE_IMAGE_DIR / new_image, "WEBP", quality=82, method=6)
+                    except (UnidentifiedImageError, OSError, Image.DecompressionBombError, ValueError):
+                        flash("Upload a valid, non-animated JPG, PNG or WebP image.", "error")
+                        return redirect(url_for("profile"))
+                old_image = current_user.profile_image
+                current_user.display_name = display_name or None
+                if new_image:
+                    current_user.profile_image = new_image
+                elif remove_image:
+                    current_user.profile_image = None
+                audit(current_user.username, "profile_updated", "user", current_user.id)
+                try:
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
+                    if new_image:
+                        (PROFILE_IMAGE_DIR / new_image).unlink(missing_ok=True)
+                    raise
+                if old_image and current_user.profile_image != old_image:
+                    (PROFILE_IMAGE_DIR / old_image).unlink(missing_ok=True)
+                flash("Your profile has been updated.", "success")
+                return redirect(url_for("profile"))
+        else:
+            abort(400)
+    return render_template("profile.html")
+
+@app.get("/profile/image/<filename>")
+@login_required
+def profile_image(filename):
+    if not current_user.profile_image or not secrets.compare_digest(filename, current_user.profile_image):
+        abort(404)
+    return send_from_directory(PROFILE_IMAGE_DIR, current_user.profile_image, mimetype="image/webp", max_age=3600)
+
+
 @app.route("/submit",methods=["GET","POST"])
 @login_required
 def submit():
@@ -359,7 +465,7 @@ def migrate_existing_database():
     if "user" in tables:
         cols={c["name"] for c in inspector.get_columns("user")}
         dialect=db.engine.dialect.name
-        additions={"email":"VARCHAR(254)","is_approved":"BOOLEAN NOT NULL DEFAULT TRUE","auth_token":"VARCHAR(64)"}
+        additions={"email":"VARCHAR(254)","is_approved":"BOOLEAN NOT NULL DEFAULT TRUE","auth_token":"VARCHAR(64)","display_name":"VARCHAR(80)","profile_image":"VARCHAR(80)"}
         for name,definition in additions.items():
             if name not in cols: db.session.execute(text(f"ALTER TABLE \"user\" ADD COLUMN {name} {definition}"))
         # Existing accounts receive tokens; old sessions must sign in again.
