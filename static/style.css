@@ -345,3 +345,56 @@ body.auth-page .auth-flash{position:fixed;z-index:20;top:16px;right:16px;width:m
 
 /* Language preference controls */
 .profile-form select{box-sizing:border-box;width:100%;min-height:43px;padding:10px 12px;border:1px solid #d6e2de;border-radius:8px;background:#fff;color:#24484d;font:13px Arial,sans-serif}.profile-form select:focus{outline:2px solid rgba(8,126,112,.16);border-color:#087e70}.language-card{grid-column:1/-1}
+
+
+/* MedMaintain clinical palette refresh */
+:root{
+  --ink:#17364f;
+  --muted:#607487;
+  --green:#087f78;
+  --mint:#e5f4f1;
+  --line:#dce5eb;
+  --mm-navy:#163b5c;
+  --mm-blue:#287fa8;
+  --mm-teal:#087f78;
+  --mm-bg:#f4f7fa;
+  --mm-surface:#ffffff;
+  --mm-soft:#eaf3f7;
+}
+body{background:var(--mm-bg);color:var(--ink)}
+.app-topbar,.nav{background:var(--mm-surface);border-color:var(--line)}
+.logo,.logo b{color:var(--mm-navy)}
+.logo>span{background:#e2f1f5;color:var(--mm-teal)}
+.app-sidebar{background:var(--mm-navy);color:#e8f1f7}
+.sidebar-link{color:#d5e4ee}
+.sidebar-link:hover,.sidebar-link.active{background:rgba(255,255,255,.12);color:#fff}
+.sidebar-link.active{box-shadow:inset 3px 0 #42c2b2}
+.sidebar-section-label,.sidebar-bottom{color:#a9c0d0}
+.sidebar-status-dot{background:#42c2b2}
+.button,.nav .navbtn{background:var(--mm-teal);border-color:var(--mm-teal);color:#fff}
+.button:hover,.nav .navbtn:hover{background:#066b66;border-color:#066b66}
+.button-outline{background:#fff;color:var(--mm-navy)!important;border-color:#b9ccd8}
+.button-outline:hover{background:var(--mm-soft)}
+a,.textlink,td a{color:#087f78}
+a:hover,.textlink:hover{color:#075e63}
+.eyebrow{color:var(--mm-teal)}
+.dashboard-welcome,.landing-art{background:linear-gradient(125deg,#e7f2f6,#e8f4f0);border-color:#d7e7eb}
+.dashboard-welcome h1,.landing-hero h1,.dashboard-intro h1{color:var(--mm-navy)}
+.dashboard-welcome h1 em,.landing-hero h1 em,.dashboard-intro h1 em{color:var(--mm-teal)}
+.stats>div,.stat-card,.feature-card,.entryform,.detail,.auth,.tablebox{border-color:var(--line);box-shadow:0 7px 22px rgba(22,59,92,.045)}
+.stats b{color:var(--mm-navy)}
+.stats small,.detailgrid small{color:#64798a}
+th{background:#edf3f6;color:#526c7d}
+td{color:#455f70}
+.search button,.smallbtn{background:#e3f1f1;color:#086e6b}
+.status{background:#e2f3eb;color:#16734f}
+.status.in-maintenance{background:#fff1d9;color:#94620d}
+.status.out-of-service{background:#fde8e7;color:#a83232}
+.status.standby{background:#e7eef8;color:#3e6392}
+.status.decommissioned{background:#edf0f2;color:#596b76}
+.impact-section{background:#eaf3f6;border-color:#d9e7ed}
+.future-band{background:var(--mm-navy)}
+footer{background:#f0f4f7;border-color:var(--line);color:#627789}
+footer a{color:var(--mm-teal)}
+.auth-form input:focus{border-color:#2d9a91;box-shadow:0 0 0 3px rgba(8,127,120,.12)}
+@media(prefers-reduced-motion:no-preference){.button,.nav .navbtn,.sidebar-link{transition:background-color .18s ease,color .18s ease,border-color .18s ease}}
