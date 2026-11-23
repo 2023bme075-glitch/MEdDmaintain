@@ -20,14 +20,14 @@
 {% if current_user.role in ['owner','supervisor','admin'] and pending_count %}<div class="flash">There are {{pending_count}} maintenance entries awaiting review. <a href="{{url_for('supervisor_portal')}}">Open the supervisor portal</a>.</div>{% endif %}
 <section class="workspace-overview">
   <div class="sectionhead">
-    <div><p class="eyebrow">WORKSPACE OVERVIEW</p><h2>Equipment at a glance</h2></div>
+    <div><p class="eyebrow">WORKSPACE OVERVIEW</p><h2>{{ tr("Equipment at a glance") }}</h2></div>
     <p class="overview-note">A live summary of the records currently saved in MedMaintain.</p>
   </div>
   <div class="stats">
-    <div class="stat-card stat-total"><small>Total records</small><b>{{stats.total}}</b><span>Equipment records in the register</span></div>
-    <div class="stat-card stat-operational"><small>Operational</small><b>{{stats.operational}}</b><span>Marked as operational</span></div>
-    <div class="stat-card stat-maintenance"><small>In maintenance</small><b>{{stats.maintenance}}</b><span>Currently being serviced</span></div>
-    <div class="stat-card stat-out"><small>Out of service</small><b>{{stats.out}}</b><span>Requires attention</span></div>
+    <div class="stat-card stat-total"><small>{{ tr("Total records") }}</small><b>{{stats.total}}</b><span>Equipment records in the register</span></div>
+    <div class="stat-card stat-operational"><small>{{ tr("Operational") }}</small><b>{{stats.operational}}</b><span>Marked as operational</span></div>
+    <div class="stat-card stat-maintenance"><small>{{ tr("In maintenance") }}</small><b>{{stats.maintenance}}</b><span>Currently being serviced</span></div>
+    <div class="stat-card stat-out"><small>{{ tr("Out of service") }}</small><b>{{stats.out}}</b><span>Requires attention</span></div>
   </div>
 </section>
 
