@@ -102,3 +102,13 @@ The public register exposes equipment information. Do not enter patient identifi
 6. Notebook POST submissions are also queued for supervisor review. The notebook GET endpoint returns approved records only.
 
 The domain allowlist checks the email address's domain; it does not independently prove control of that mailbox. The private one-time owner token is the proof of control for initial owner creation. If mailbox ownership verification is required for technicians, add an organization email-verification service before enabling registration. The additive database migration preserves existing accounts and treats legacy accounts/records as approved; review those existing accounts after upgrading.
+
+
+## User profiles
+- Signed-in technicians and privileged users can open My profile from the sidebar or top-right account area.
+- Users can set a display name and upload/remove a profile picture. Accepted images are JPG, PNG or WebP, maximum 2 MB; images are resized to 512 × 512 and stored as optimized WebP files in the private instance/profile_images folder, not in the public static directory.
+- Profile images are served only to signed-in users and only to the account that owns the image.
+- Users can change their own password after entering the current password. New passwords must be at least 12 characters.
+- Username, email address and role are not editable from the profile page. This preserves record attribution and prevents self-promotion. Email changes should be added only with an email verification workflow.
+- The profile routes use a session-bound CSRF token. The additive database migration adds display_name and profile_image without deleting existing accounts or equipment records.
+- Back up the instance directory along with the SQLite database; it contains uploaded profile pictures.
