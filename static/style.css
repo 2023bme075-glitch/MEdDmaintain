@@ -342,3 +342,6 @@ body.auth-page .auth-flash{position:fixed;z-index:20;top:16px;right:16px;width:m
 .profile-remove{display:flex!important;align-items:center;gap:8px!important;color:#7a5555!important;font-weight:600!important}.profile-remove input{width:16px;min-height:16px}
 .profile-security-note{margin:14px 0 0;color:#829193;font-size:11px;line-height:1.6}
 @media(max-width:760px){.profile-grid{grid-template-columns:1fr}.profile-card{padding:21px}.profile-heading h1{font-size:23px}}
+
+/* Language preference controls */
+.profile-form select{box-sizing:border-box;width:100%;min-height:43px;padding:10px 12px;border:1px solid #d6e2de;border-radius:8px;background:#fff;color:#24484d;font:13px Arial,sans-serif}.profile-form select:focus{outline:2px solid rgba(8,126,112,.16);border-color:#087e70}.language-card{grid-column:1/-1}
