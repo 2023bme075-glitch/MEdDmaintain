@@ -20,13 +20,14 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
     <a class="logo" href="{{ url_for('index') }}"><span>✚</span><b>MedMaintain<small>Medical equipment maintenance</small></b></a>
     <div class="topbar-right">
       <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
-      <span class="topbar-user"><span class="user-avatar">{{ current_user.username[:1]|upper }}</span><span><b>{{ current_user.username }}</b><small>{{ current_user.role|title }}</small></span></span>
+      <a class="topbar-user topbar-profile-link" href="{{ url_for('profile') }}" title="Open your profile">{% if current_user.profile_image %}<img class="user-avatar user-avatar-image" src="{{ url_for('profile_image', filename=current_user.profile_image) }}" alt="Profile picture">{% else %}<span class="user-avatar">{{ (current_user.display_name or current_user.username)[:1]|upper }}</span>{% endif %}<span><b>{{ current_user.display_name or current_user.username }}</b><small>{{ current_user.role|title }} · My profile</small></span></a>
       <a class="topbar-signout" href="{{ url_for('logout') }}">Sign out</a>
     </div>
   </header>
   <div class="app-layout">
     <aside class="app-sidebar" id="appSidebar" aria-label="Main navigation">
       <div class="sidebar-section-label">WORKSPACE</div>
+      <a class="sidebar-link {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}"><span class="side-icon">◎</span><span>My profile</span></a>
       <a class="sidebar-link {% if request.endpoint == 'index' and not request.args.get('q') %}active{% endif %}" href="{{ url_for('index') }}"><span class="side-icon">⌂</span><span>Dashboard</span></a>
       <a class="sidebar-link" href="{{ url_for('index') }}#equipment-register"><span class="side-icon">▤</span><span>Equipment register</span></a>
       <a class="sidebar-link {% if request.endpoint == 'submit' %}active{% endif %}" href="{{ url_for('submit') }}"><span class="side-icon">＋</span><span>New maintenance entry</span></a>
