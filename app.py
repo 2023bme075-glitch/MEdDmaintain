@@ -15,8 +15,9 @@ db_url = os.environ.get("DATABASE_URL", "sqlite:///medmaintain.db")
 if db_url.startswith("postgres://"): db_url = db_url.replace("postgres://", "postgresql://", 1)
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
-MAX_PROFILE_IMAGE_SIZE = 2 * 1024 * 1024
+# Allow a 7 MiB profile image plus multipart form overhead.
+app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
+MAX_PROFILE_IMAGE_SIZE = 7 * 1024 * 1024
 PROFILE_IMAGE_DIR = Path(app.instance_path) / "profile_images"
 PROFILE_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
@@ -256,7 +257,7 @@ def profile():
                 remove_image = request.form.get("remove_image") == "yes"
                 if upload and upload.filename:
                     if len(upload.read()) > MAX_PROFILE_IMAGE_SIZE:
-                        flash("The image must be 2 MB or smaller.", "error")
+                        flash("The image must be 7 MB or smaller.", "error")
                         return redirect(url_for("profile"))
                     upload.stream.seek(0)
                     try:
