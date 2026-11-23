@@ -14,7 +14,7 @@
         <div class="profile-avatar-large">
           {% if current_user.profile_image %}<img src="{{ url_for('profile_image', filename=current_user.profile_image) }}" alt="Your profile picture">{% else %}{{ (current_user.display_name or current_user.username)[:1]|upper }}{% endif %}
         </div>
-        <div class="profile-avatar-note"><b>{{ current_user.display_name or current_user.username }}</b><br>JPG, PNG or WebP · Maximum 2 MB<br>Images are resized automatically.</div>
+        <div class="profile-avatar-note"><b>{{ current_user.display_name or current_user.username }}</b><br>JPG, PNG or WebP · Maximum 7 MB<br>Images are resized automatically.</div>
       </div>
       <form class="profile-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ profile_csrf_token() }}">
