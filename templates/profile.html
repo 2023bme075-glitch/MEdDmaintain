@@ -4,12 +4,13 @@
 <section class="profile-page">
   <header class="profile-heading">
     <h1>My profile</h1>
-    <p>Manage your personal details, profile picture and account password.</p>
+    <p>{{ tr("Manage your personal details, profile picture and account password.") }}</p>
   </header>
   <div class="profile-grid">
+<section class="profile-card"><h2>{{ tr("Language preference") }}</h2><p class="profile-card-intro">Choose your own language. Select the system default to follow the owner’s setting.</p><form method="POST" class="profile-form"><input type="hidden" name="csrf_token" value="{{ profile_csrf_token() }}"><input type="hidden" name="action" value="language"><label>{{ tr("Language preference") }}<select name="language_preference"><option value="default" {% if current_user.language_preference == "default" %}selected{% endif %}>{{ tr("Use system default") }}</option>{% for code,name in language_options.items() %}<option value="{{ code }}" {% if current_user.language_preference == code %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label><button class="profile-button" type="submit">{{ tr("Save language preference") }}</button></form></section>
     <section class="profile-card">
-      <h2>Personal information</h2>
-      <p class="profile-card-intro">Your display name and profile picture are visible in your signed-in workspace.</p>
+      <h2>{{ tr("Personal information") }}</h2>
+      <p class="profile-card-intro">{{ tr("Your display name and profile picture are visible in your signed-in workspace.") }}</p>
       <div class="profile-avatar-wrap">
         <div class="profile-avatar-large">
           {% if current_user.profile_image %}<img src="{{ url_for('profile_image', filename=current_user.profile_image) }}" alt="Your profile picture">{% else %}{{ (current_user.display_name or current_user.username)[:1]|upper }}{% endif %}
@@ -19,41 +20,41 @@
       <form class="profile-form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ profile_csrf_token() }}">
         <input type="hidden" name="action" value="details">
-        <label for="display_name">Display name
+        <label for="display_name">{{ tr("Display name") }}
           <input id="display_name" name="display_name" type="text" maxlength="80" value="{{ current_user.display_name or '' }}" placeholder="How your name should appear">
         </label>
-        <label for="profile_image">Profile picture
+        <label for="profile_image">{{ tr("Profile picture") }}
           <input id="profile_image" name="profile_image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
         </label>
         {% if current_user.profile_image %}
         <label class="profile-remove"><input type="checkbox" name="remove_image" value="yes"> Remove my current profile picture</label>
         {% endif %}
-        <button class="profile-button" type="submit">Save profile changes</button>
+        <button class="profile-button" type="submit">{{ tr("Save profile changes") }}</button>
       </form>
       <div class="profile-meta">
-        <div class="profile-meta-row"><span>Username</span><b>{{ current_user.username }}</b></div>
-        <div class="profile-meta-row"><span>Email address</span><b>{{ current_user.email or 'Not provided' }}</b></div>
-        <div class="profile-meta-row"><span>Account role</span><b>{{ current_user.role|title }}</b></div>
-        <div class="profile-meta-row"><span>Account status</span><b>{{ 'Approved' if current_user.is_approved or current_user.role in ['owner','supervisor','admin'] else 'Pending approval' }}</b></div>
+        <div class="profile-meta-row"><span>{{ tr("Username") }}</span><b>{{ current_user.username }}</b></div>
+        <div class="profile-meta-row"><span>{{ tr("Email address") }}</span><b>{{ current_user.email or 'Not provided' }}</b></div>
+        <div class="profile-meta-row"><span>{{ tr("Account role") }}</span><b>{{ current_user.role|title }}</b></div>
+        <div class="profile-meta-row"><span>{{ tr("Account status") }}</span><b>{{ 'Approved' if current_user.is_approved or current_user.role in ['owner','supervisor','admin'] else 'Pending approval' }}</b></div>
       </div>
-      <p class="profile-security-note">Username, email and role are read-only here to protect account identity and maintenance-record history.</p>
+      <p class="profile-security-note">{{ tr("Username") }}, email and role are read-only here to protect account identity and maintenance-record history.</p>
     </section>
     <section class="profile-card">
-      <h2>Change password</h2>
+      <h2>{{ tr("Change password") }}</h2>
       <p class="profile-card-intro">For your security, confirm your current password before choosing a new one.</p>
       <form class="profile-form" method="POST">
         <input type="hidden" name="csrf_token" value="{{ profile_csrf_token() }}">
         <input type="hidden" name="action" value="password">
-        <label for="current_password">Current password
+        <label for="current_password">{{ tr("Current password") }}
           <input id="current_password" name="current_password" type="password" required autocomplete="current-password">
         </label>
-        <label for="new_password">New password
+        <label for="new_password">{{ tr("New password") }}
           <input id="new_password" name="new_password" type="password" required minlength="12" autocomplete="new-password">
         </label>
-        <label for="confirm_password">Confirm new password
+        <label for="confirm_password">{{ tr("Confirm new password") }}
           <input id="confirm_password" name="confirm_password" type="password" required minlength="12" autocomplete="new-password">
         </label>
-        <button class="profile-button" type="submit">Update password</button>
+        <button class="profile-button" type="submit">{{ tr("Update password") }}</button>
       </form>
       <p class="profile-security-note">Use at least 12 characters. After a successful password change, other signed-in sessions for this account are invalidated.</p>
     </section>
