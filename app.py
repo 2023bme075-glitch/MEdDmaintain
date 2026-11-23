@@ -138,6 +138,11 @@ def validate(payload):
       current_location=(p.get("current_location") or "").strip() or "N/A",past_locations=(p.get("past_locations") or "").strip() or "N/A",
       service_date=service_date,service_type=service_type,status=status,issues=(p.get("issues") or "").strip() or "N/A"),None
 
+@app.get("/copyright")
+def copyright():
+    return render_template("copyright.html")
+
+
 @app.get("/")
 def index():
     if not current_user.is_authenticated: return render_template("index.html",records=[],stats=None,q="")
