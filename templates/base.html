@@ -17,7 +17,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
 {% if not auth_page %}
   {% if current_user.is_authenticated %}
   <header class="app-topbar">
-    <a class="logo" href="{{ url_for('index') }}" aria-label="MedMaintain home"><img class="brand-logo" src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"></a>
+    <a class="logo" href="{{ url_for('index') }}" aria-label="MedMaintain home"><img class="brand-logo" src="{{ url_for('static', filename='medmaintain-logo.webp') }}" alt="MedMaintain"></a>
     <div class="topbar-right">
       <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
       <a class="topbar-user topbar-profile-link" href="{{ url_for('profile') }}" title="Open your profile">{% if current_user.profile_image %}<img class="user-avatar user-avatar-image" src="{{ url_for('profile_image', filename=current_user.profile_image) }}" alt="Profile picture">{% else %}<span class="user-avatar">{{ (current_user.display_name or current_user.username)[:1]|upper }}</span>{% endif %}<span><b>{{ current_user.display_name or current_user.username }}</b><small>{{ current_user.role|title }} · My profile</small></span></a>
@@ -26,7 +26,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
   </header>
   <div class="app-layout">
     <aside class="app-sidebar" id="appSidebar" aria-label="Main navigation">
-      <a class="sidebar-brand" href="{{ url_for('index') }}" aria-label="MedMaintain home"><img src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"></a>
+      <a class="sidebar-brand" href="{{ url_for('index') }}" aria-label="MedMaintain home"><img src="{{ url_for('static', filename='medmaintain-logo.webp') }}" alt="MedMaintain"></a>
       <div class="sidebar-section-label">{{ tr("WORKSPACE") }}</div>
       <a class="sidebar-link {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}"><span class="side-icon">◎</span><span>{{ tr("My profile") }}</span></a>
       <a class="sidebar-link {% if request.endpoint == 'index' and not request.args.get('q') %}active{% endif %}" href="{{ url_for('index') }}"><span class="side-icon">⌂</span><span>{{ tr("Dashboard") }}</span></a>
@@ -45,7 +45,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
     <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation"></button>
     <div class="app-main"><main class="container app-container">
   {% else %}
-  <header class="nav"><a class="logo" href="/" aria-label="MedMaintain home"><img class="brand-logo" src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"></a><nav><a href="/#why-maintenance">About maintenance</a><a href="/login">Sign in</a><a class="navbtn" href="/register">Create account</a></nav></header>
+  <header class="nav"><a class="logo" href="/" aria-label="MedMaintain home"><img class="brand-logo" src="{{ url_for('static', filename='medmaintain-logo.webp') }}" alt="MedMaintain"></a><nav><a href="/#why-maintenance">About maintenance</a><a href="/login">Sign in</a><a class="navbtn" href="/register">Create account</a></nav></header>
   <main class="container">
   {% endif %}
 {% endif %}
@@ -57,7 +57,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
   {% if current_user.is_authenticated %}
     </div>
   </div>
-  <footer><img class="footer-brand-logo" src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"><span>Medical equipment maintenance management<br>Supporting equipment reliability and patient safety · <a href="{{ url_for('copyright') }}">Copyright © 2026 KATENDE Joel</a></span></footer>
+  <footer><img class="footer-brand-logo" src="{{ url_for('static', filename='medmaintain-logo.webp') }}" alt="MedMaintain"><span>Medical equipment maintenance management<br>Supporting equipment reliability and patient safety · <a href="{{ url_for('copyright') }}">Copyright © 2026 KATENDE Joel</a></span></footer>
   <script>
   (() => {
     const toggle = document.getElementById('sidebarToggle');
@@ -77,7 +77,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
   })();
   </script>
   {% else %}
-  <footer><img class="footer-brand-logo" src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"><span>Medical equipment maintenance management<br>Supporting equipment reliability and patient safety · <a href="{{ url_for('copyright') }}">Copyright © 2026 KATENDE Joel</a></span></footer>
+  <footer><img class="footer-brand-logo" src="{{ url_for('static', filename='medmaintain-logo.webp') }}" alt="MedMaintain"><span>Medical equipment maintenance management<br>Supporting equipment reliability and patient safety · <a href="{{ url_for('copyright') }}">Copyright © 2026 KATENDE Joel</a></span></footer>
   {% endif %}
 {% endif %}
 </body></html>
