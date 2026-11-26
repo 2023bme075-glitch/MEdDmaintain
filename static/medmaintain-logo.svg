@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 180" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 220" role="img" aria-labelledby="title desc">
 <title id="title">MedMaintain</title><desc id="desc">Stethoscope and electronic circuit symbol with the MedMaintain wordmark</desc>
 <g fill="none" stroke="#2384c6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="32" cy="19" r="11" fill="#2384c6" stroke="none"/><circle cx="112" cy="19" r="11" fill="#2384c6" stroke="none"/>
@@ -7,5 +7,5 @@
 <path d="M105 166 L145 126 V105 L119 131 H99 L81 149 M119 131 V160 L87 192 M145 126 V167 L105 207"/>
 <circle cx="105" cy="166" r="12"/><circle cx="81" cy="149" r="5"/><circle cx="87" cy="192" r="6" fill="#2384c6" stroke="none"/><circle cx="105" cy="207" r="6" fill="#2384c6" stroke="none"/>
 </g>
-<text x="180" y="119" font-family="Inter, Arial, sans-serif" font-size="82" font-weight="500" fill="#2384c6">Med</text><text x="352" y="119" font-family="Inter, Arial, sans-serif" font-size="82" font-weight="750" fill="#163b5c">Maintain</text>
+<text x="180" y="137" font-family="Inter, Arial, sans-serif" font-size="82" font-weight="500" fill="#2384c6">Med</text><text x="352" y="137" font-family="Inter, Arial, sans-serif" font-size="82" font-weight="750" fill="#163b5c">Maintain</text>
 </svg>
