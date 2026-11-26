@@ -398,3 +398,26 @@ footer{background:#f0f4f7;border-color:var(--line);color:#627789}
 footer a{color:var(--mm-teal)}
 .auth-form input:focus{border-color:#2d9a91;box-shadow:0 0 0 3px rgba(8,127,120,.12)}
 @media(prefers-reduced-motion:no-preference){.button,.nav .navbtn,.sidebar-link{transition:background-color .18s ease,color .18s ease,border-color .18s ease}}
+
+
+/* MedMaintain logo placement */
+.logo{display:flex;align-items:center;gap:0;min-width:0;text-decoration:none}
+.logo .brand-logo{display:block;width:clamp(175px,19vw,245px);height:58px;object-fit:contain;object-position:left center}
+.app-topbar .logo .brand-logo{width:220px;height:58px}
+.sidebar-brand{display:flex;align-items:center;justify-content:center;margin:0 4px 28px;padding:5px 4px 18px;border-bottom:1px solid rgba(220,237,246,.18)}
+.sidebar-brand img{display:block;width:100%;max-width:190px;height:65px;object-fit:contain;filter:brightness(0) invert(1)}
+.app-sidebar .sidebar-section-label{margin-top:0}
+footer{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.footer-brand-logo{display:block;width:190px;max-width:42vw;height:58px;object-fit:contain;object-position:left center}
+.auth-brand{display:inline-flex;align-items:center;width:max-content;max-width:100%}
+.auth-brand img{display:block;width:245px;max-width:65vw;height:76px;object-fit:contain;object-position:left center;filter:brightness(0) invert(1)}
+@media(max-width:820px){
+ .app-topbar .logo .brand-logo{width:175px;height:48px}
+ .sidebar-brand{margin-bottom:20px}
+ footer{align-items:flex-start}
+ .footer-brand-logo{width:160px;height:48px}
+}
+@media(max-width:460px){
+ .app-topbar .logo .brand-logo{width:145px;height:42px}
+ .footer-brand-logo{width:140px}
+}
