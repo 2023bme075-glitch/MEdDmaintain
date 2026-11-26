@@ -77,7 +77,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
   })();
   </script>
   {% else %}
-  <footer><span>MedMaintain · Medical equipment maintenance management</span><span>Supporting equipment reliability and patient safety · <a href="{{ url_for('copyright') }}">Copyright © 2026 KATENDE Joel</a></span></footer>
+  <footer><img class="footer-brand-logo" src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"><span>Medical equipment maintenance management<br>Supporting equipment reliability and patient safety · <a href="{{ url_for('copyright') }}">Copyright © 2026 KATENDE Joel</a></span></footer>
   {% endif %}
 {% endif %}
 </body></html>
