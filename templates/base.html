@@ -7,7 +7,7 @@
 <meta name="description" content="MedMaintain supports medical equipment maintenance and safer patient care.">
 <title>{% block title %}MedMaintain | Medical Equipment Maintenance{% endblock %}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto+Serif:opsz,wght@8..144,400;8..144,500;8..144,600;8..144,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static',filename='style.css', v='profile-settings1') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='style.css', v='medmaintain-logo1') }}">
 <style>
 .review-actions{display:flex;gap:18px;align-items:end;flex-wrap:wrap;margin:24px 0}.review-actions form{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.review-actions label{display:grid;gap:6px;font-size:12px}.review-actions input{min-width:240px;padding:10px;border:1px solid #cbdad7;border-radius:8px}
 body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth-screen{display:grid!important;grid-template-columns:60% 40%!important;width:100%!important;min-height:100vh!important;margin:0!important}body.auth-page .auth-visual{box-sizing:border-box;display:flex!important;flex-direction:column;justify-content:space-between;min-height:100vh;padding:48px clamp(32px,5vw,76px);color:#fff;background:linear-gradient(90deg,rgba(5,24,43,.88),rgba(5,35,54,.55)),url('/static/biomedical-maintenance-hero.webp') center/cover no-repeat!important}body.auth-page .auth-form-side{box-sizing:border-box;display:flex!important;align-items:center!important;justify-content:center!important;min-height:100vh;padding:50px clamp(34px,6vw,90px);background:#fff!important}body.auth-page .auth-form-panel{width:100%;max-width:430px}body.auth-page .auth-form{display:grid!important;gap:22px}body.auth-page .auth-form label{display:grid!important;gap:8px}body.auth-page .auth-form input{box-sizing:border-box;width:100%;height:46px;padding:0 3px;border:0;border-bottom:1px solid #bdc9ce;background:transparent}body.auth-page .auth-submit{display:flex;justify-content:space-between;width:100%;padding:16px 22px;border:0;border-radius:28px;background:#087f78;color:#fff;font-weight:800;cursor:pointer}body.auth-page .password-field{position:relative}body.auth-page .password-toggle{position:absolute;right:0;bottom:8px;border:0;background:transparent;color:#087e70}body.auth-page .auth-flash{position:fixed;z-index:20;top:16px;right:16px;width:min(420px,calc(100vw - 32px))}@media(max-width:800px){body.auth-page .auth-screen{grid-template-columns:1fr!important}body.auth-page .auth-visual{min-height:360px;padding:28px}body.auth-page .auth-form-side{min-height:auto;padding:50px 28px}}
@@ -17,7 +17,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
 {% if not auth_page %}
   {% if current_user.is_authenticated %}
   <header class="app-topbar">
-    <a class="logo" href="{{ url_for('index') }}"><span>✚</span><b>MedMaintain<small>Medical equipment maintenance</small></b></a>
+    <a class="logo" href="{{ url_for('index') }}" aria-label="MedMaintain home"><img class="brand-logo" src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"></a>
     <div class="topbar-right">
       <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
       <a class="topbar-user topbar-profile-link" href="{{ url_for('profile') }}" title="Open your profile">{% if current_user.profile_image %}<img class="user-avatar user-avatar-image" src="{{ url_for('profile_image', filename=current_user.profile_image) }}" alt="Profile picture">{% else %}<span class="user-avatar">{{ (current_user.display_name or current_user.username)[:1]|upper }}</span>{% endif %}<span><b>{{ current_user.display_name or current_user.username }}</b><small>{{ current_user.role|title }} · My profile</small></span></a>
@@ -26,6 +26,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
   </header>
   <div class="app-layout">
     <aside class="app-sidebar" id="appSidebar" aria-label="Main navigation">
+      <a class="sidebar-brand" href="{{ url_for('index') }}" aria-label="MedMaintain home"><img src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"></a>
       <div class="sidebar-section-label">{{ tr("WORKSPACE") }}</div>
       <a class="sidebar-link {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}"><span class="side-icon">◎</span><span>{{ tr("My profile") }}</span></a>
       <a class="sidebar-link {% if request.endpoint == 'index' and not request.args.get('q') %}active{% endif %}" href="{{ url_for('index') }}"><span class="side-icon">⌂</span><span>{{ tr("Dashboard") }}</span></a>
@@ -44,7 +45,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
     <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation"></button>
     <div class="app-main"><main class="container app-container">
   {% else %}
-  <header class="nav"><a class="logo" href="/"><span>✚</span><b>MedMaintain<small>Medical equipment maintenance</small></b></a><nav><a href="/#why-maintenance">About maintenance</a><a href="/login">Sign in</a><a class="navbtn" href="/register">Create account</a></nav></header>
+  <header class="nav"><a class="logo" href="/" aria-label="MedMaintain home"><img class="brand-logo" src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"></a><nav><a href="/#why-maintenance">About maintenance</a><a href="/login">Sign in</a><a class="navbtn" href="/register">Create account</a></nav></header>
   <main class="container">
   {% endif %}
 {% endif %}
@@ -56,7 +57,7 @@ body.auth-page{margin:0!important;background:#fff!important}body.auth-page .auth
   {% if current_user.is_authenticated %}
     </div>
   </div>
-  <footer><span>MedMaintain · Medical equipment maintenance management</span><span>Supporting equipment reliability and patient safety · <a href="{{ url_for('copyright') }}">Copyright © 2026 KATENDE Joel</a></span></footer>
+  <footer><img class="footer-brand-logo" src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"><span>Medical equipment maintenance management<br>Supporting equipment reliability and patient safety · <a href="{{ url_for('copyright') }}">Copyright © 2026 KATENDE Joel</a></span></footer>
   <script>
   (() => {
     const toggle = document.getElementById('sidebarToggle');
