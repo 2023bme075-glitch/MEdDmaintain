@@ -3,7 +3,7 @@
 {% block content %}
 <section class="auth-screen">
 <aside class="auth-visual">
-<a class="auth-brand" href="{{ url_for('index') }}"><span class="auth-brand-mark">✚</span><span class="auth-brand-name">MedMaintain<small>MEDICAL EQUIPMENT MAINTENANCE</small></span></a>
+<a class="auth-brand" href="{{ url_for('index') }}" aria-label="MedMaintain home"><img src="{{ url_for('static', filename='medmaintain-logo.svg') }}" alt="MedMaintain"></a>
 <div class="auth-visual-copy"><p class="auth-overline">BIOMEDICAL ENGINEERING · EQUIPMENT CARE</p>
 <h1>{% if mode == 'register' %}Join the team keeping medical equipment reliable.{% else %}Reliable medical equipment. Safer patient care.{% endif %}</h1>
 <p>{% if mode == 'register' %}Create a technician account using your approved organization email. A supervisor must approve new accounts before access is granted.{% else %}Access equipment records, maintenance histories and the tools you need to support safe, reliable healthcare equipment.{% endif %}</p></div>
